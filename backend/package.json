@@ -1,0 +1,24 @@
+{
+  "type": "module",
+  "name": "backendproy2",
+  "version": "1.0.0",
+  "description": "Backend script for restaurant api",
+  "main": "main.js",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PedroPabloGuzmanMayen/Proyecto2_BD.git"
+  },
+  "author": "ppguz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PedroPabloGuzmanMayen/Proyecto2_BD/issues"
+  },
+  "homepage": "https://github.com/PedroPabloGuzmanMayen/Proyecto2_BD#readme",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "mongodb": "^6.16.0"
+  }
+}

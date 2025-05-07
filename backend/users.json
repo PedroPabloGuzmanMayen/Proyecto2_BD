@@ -1,0 +1,702 @@
+[
+  {
+    "_id": "681b941061307d035f70d8e5",
+    "username": "laura455",
+    "password": "pass2058",
+    "city": "Málaga",
+    "birthdate": "2024-03-19T22:07:17.845Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8e6",
+    "username": "sofía262",
+    "password": "pass5271",
+    "city": "Madrid",
+    "birthdate": "2024-04-11T12:34:36.003Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8e7",
+    "username": "ana490",
+    "password": "pass3513",
+    "city": "Barcelona",
+    "birthdate": "2023-08-09T06:32:21.493Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8e8",
+    "username": "maría403",
+    "password": "pass9840",
+    "city": "Barcelona",
+    "birthdate": "2023-06-21T22:23:25.052Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8e9",
+    "username": "laura358",
+    "password": "pass8605",
+    "city": "Sevilla",
+    "birthdate": "2024-11-23T07:18:50.758Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ea",
+    "username": "ana196",
+    "password": "pass4664",
+    "city": "Málaga",
+    "birthdate": "2025-03-15T19:06:50.527Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8eb",
+    "username": "laura963",
+    "password": "pass5034",
+    "city": "Barcelona",
+    "birthdate": "2023-10-10T09:59:42.360Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ec",
+    "username": "david483",
+    "password": "pass6748",
+    "city": "Sevilla",
+    "birthdate": "2024-05-27T11:42:40.661Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ed",
+    "username": "david216",
+    "password": "pass2090",
+    "city": "Palma",
+    "birthdate": "2024-02-10T17:16:07.496Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ee",
+    "username": "sofía43",
+    "password": "pass9156",
+    "city": "Murcia",
+    "birthdate": "2023-05-17T07:09:13.935Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ef",
+    "username": "laura717",
+    "password": "pass7078",
+    "city": "Palma",
+    "birthdate": "2024-05-09T22:48:43.180Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f0",
+    "username": "david640",
+    "password": "pass6253",
+    "city": "Palma",
+    "birthdate": "2024-08-30T16:07:16.722Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f1",
+    "username": "carlos867",
+    "password": "pass8726",
+    "city": "Palma",
+    "birthdate": "2024-02-08T23:14:06.532Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f2",
+    "username": "laura888",
+    "password": "pass9277",
+    "city": "Sevilla",
+    "birthdate": "2025-02-09T15:24:45.213Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f3",
+    "username": "pedro494",
+    "password": "pass2144",
+    "city": "Murcia",
+    "birthdate": "2024-10-29T12:59:47.074Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f4",
+    "username": "ana945",
+    "password": "pass1800",
+    "city": "Murcia",
+    "birthdate": "2024-12-14T23:22:40.318Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f5",
+    "username": "sofía368",
+    "password": "pass1725",
+    "city": "Barcelona",
+    "birthdate": "2024-03-29T00:45:45.685Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f6",
+    "username": "ana985",
+    "password": "pass7022",
+    "city": "Zaragoza",
+    "birthdate": "2023-09-13T20:55:05.939Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f7",
+    "username": "david869",
+    "password": "pass3787",
+    "city": "Málaga",
+    "birthdate": "2024-03-29T12:17:04.995Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f8",
+    "username": "david502",
+    "password": "pass3750",
+    "city": "Barcelona",
+    "birthdate": "2023-11-29T03:55:29.848Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8f9",
+    "username": "sofía873",
+    "password": "pass3805",
+    "city": "Madrid",
+    "birthdate": "2024-04-24T19:36:31.054Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8fa",
+    "username": "laura520",
+    "password": "pass1618",
+    "city": "Palma",
+    "birthdate": "2023-06-19T12:04:47.644Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8fb",
+    "username": "miguel869",
+    "password": "pass8025",
+    "city": "Bilbao",
+    "birthdate": "2023-07-01T13:44:29.107Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8fc",
+    "username": "david134",
+    "password": "pass9132",
+    "city": "Palma",
+    "birthdate": "2024-04-06T19:04:19.643Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8fd",
+    "username": "ana330",
+    "password": "pass8839",
+    "city": "Las Palmas",
+    "birthdate": "2024-05-27T18:49:28.948Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8fe",
+    "username": "miguel30",
+    "password": "pass8681",
+    "city": "Barcelona",
+    "birthdate": "2024-12-13T12:55:27.500Z"
+  },
+  {
+    "_id": "681b941061307d035f70d8ff",
+    "username": "laura315",
+    "password": "pass1500",
+    "city": "Zaragoza",
+    "birthdate": "2023-08-11T14:44:23.009Z"
+  },
+  {
+    "_id": "681b941061307d035f70d900",
+    "username": "sofía176",
+    "password": "pass1330",
+    "city": "Murcia",
+    "birthdate": "2023-12-04T15:42:04.177Z"
+  },
+  {
+    "_id": "681b941061307d035f70d901",
+    "username": "ana630",
+    "password": "pass4874",
+    "city": "Zaragoza",
+    "birthdate": "2023-09-13T13:35:29.874Z"
+  },
+  {
+    "_id": "681b941061307d035f70d902",
+    "username": "juan311",
+    "password": "pass8297",
+    "city": "Murcia",
+    "birthdate": "2025-01-04T09:54:22.452Z"
+  },
+  {
+    "_id": "681b941061307d035f70d903",
+    "username": "david364",
+    "password": "pass1785",
+    "city": "Murcia",
+    "birthdate": "2024-11-17T20:06:18.503Z"
+  },
+  {
+    "_id": "681b941061307d035f70d904",
+    "username": "david116",
+    "password": "pass1875",
+    "city": "Las Palmas",
+    "birthdate": "2025-04-17T11:08:13.166Z"
+  },
+  {
+    "_id": "681b941061307d035f70d905",
+    "username": "carlos549",
+    "password": "pass2134",
+    "city": "Valencia",
+    "birthdate": "2023-07-06T12:36:21.709Z"
+  },
+  {
+    "_id": "681b941061307d035f70d906",
+    "username": "miguel917",
+    "password": "pass9274",
+    "city": "Valencia",
+    "birthdate": "2025-04-26T02:26:08.612Z"
+  },
+  {
+    "_id": "681b941061307d035f70d907",
+    "username": "lucía355",
+    "password": "pass8504",
+    "city": "Murcia",
+    "birthdate": "2024-05-10T18:30:02.623Z"
+  },
+  {
+    "_id": "681b941061307d035f70d908",
+    "username": "sofía588",
+    "password": "pass1956",
+    "city": "Málaga",
+    "birthdate": "2023-12-19T04:54:07.093Z"
+  },
+  {
+    "_id": "681b941061307d035f70d909",
+    "username": "juan304",
+    "password": "pass4008",
+    "city": "Barcelona",
+    "birthdate": "2024-09-17T20:53:34.613Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90a",
+    "username": "juan738",
+    "password": "pass5478",
+    "city": "Valencia",
+    "birthdate": "2024-11-20T01:07:31.276Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90b",
+    "username": "david359",
+    "password": "pass4310",
+    "city": "Valencia",
+    "birthdate": "2023-07-11T23:06:05.317Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90c",
+    "username": "lucía755",
+    "password": "pass1674",
+    "city": "Zaragoza",
+    "birthdate": "2023-06-17T23:02:25.654Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90d",
+    "username": "juan369",
+    "password": "pass5979",
+    "city": "Palma",
+    "birthdate": "2025-01-26T12:17:36.829Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90e",
+    "username": "miguel519",
+    "password": "pass8415",
+    "city": "Palma",
+    "birthdate": "2023-07-02T10:34:51.408Z"
+  },
+  {
+    "_id": "681b941061307d035f70d90f",
+    "username": "ana338",
+    "password": "pass1388",
+    "city": "Murcia",
+    "birthdate": "2024-04-26T18:08:59.528Z"
+  },
+  {
+    "_id": "681b941061307d035f70d910",
+    "username": "miguel288",
+    "password": "pass9783",
+    "city": "Zaragoza",
+    "birthdate": "2025-03-11T04:18:22.958Z"
+  },
+  {
+    "_id": "681b941061307d035f70d911",
+    "username": "david767",
+    "password": "pass6934",
+    "city": "Murcia",
+    "birthdate": "2024-04-20T07:09:02.421Z"
+  },
+  {
+    "_id": "681b941061307d035f70d912",
+    "username": "ana338",
+    "password": "pass3728",
+    "city": "Sevilla",
+    "birthdate": "2024-04-04T14:41:35.129Z"
+  },
+  {
+    "_id": "681b941061307d035f70d913",
+    "username": "maría877",
+    "password": "pass7835",
+    "city": "Barcelona",
+    "birthdate": "2024-04-27T08:26:08.834Z"
+  },
+  {
+    "_id": "681b941061307d035f70d914",
+    "username": "lucía446",
+    "password": "pass6720",
+    "city": "Las Palmas",
+    "birthdate": "2025-02-21T19:56:03.541Z"
+  },
+  {
+    "_id": "681b941061307d035f70d915",
+    "username": "miguel616",
+    "password": "pass8998",
+    "city": "Zaragoza",
+    "birthdate": "2025-04-05T15:15:09.662Z"
+  },
+  {
+    "_id": "681b941061307d035f70d916",
+    "username": "sofía687",
+    "password": "pass4406",
+    "city": "Zaragoza",
+    "birthdate": "2023-06-27T15:00:03.035Z"
+  },
+  {
+    "_id": "681b941061307d035f70d917",
+    "username": "maría623",
+    "password": "pass2032",
+    "city": "Zaragoza",
+    "birthdate": "2025-02-20T17:49:13.058Z"
+  },
+  {
+    "_id": "681b941061307d035f70d918",
+    "username": "maría294",
+    "password": "pass5742",
+    "city": "Palma",
+    "birthdate": "2024-09-13T13:36:01.288Z"
+  },
+  {
+    "_id": "681b941061307d035f70d919",
+    "username": "david954",
+    "password": "pass6431",
+    "city": "Barcelona",
+    "birthdate": "2024-11-05T23:51:15.307Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91a",
+    "username": "juan815",
+    "password": "pass7865",
+    "city": "Madrid",
+    "birthdate": "2024-02-09T03:16:49.310Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91b",
+    "username": "sofía487",
+    "password": "pass3444",
+    "city": "Las Palmas",
+    "birthdate": "2024-02-09T13:11:31.020Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91c",
+    "username": "sofía798",
+    "password": "pass3483",
+    "city": "Barcelona",
+    "birthdate": "2024-11-29T03:18:57.263Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91d",
+    "username": "miguel418",
+    "password": "pass1874",
+    "city": "Barcelona",
+    "birthdate": "2023-09-22T04:47:46.488Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91e",
+    "username": "ana304",
+    "password": "pass7810",
+    "city": "Madrid",
+    "birthdate": "2024-05-07T15:32:43.940Z"
+  },
+  {
+    "_id": "681b941061307d035f70d91f",
+    "username": "sofía34",
+    "password": "pass1040",
+    "city": "Zaragoza",
+    "birthdate": "2024-05-06T11:09:35.810Z"
+  },
+  {
+    "_id": "681b941061307d035f70d920",
+    "username": "sofía215",
+    "password": "pass7533",
+    "city": "Las Palmas",
+    "birthdate": "2023-11-05T23:18:28.387Z"
+  },
+  {
+    "_id": "681b941061307d035f70d921",
+    "username": "ana91",
+    "password": "pass7701",
+    "city": "Palma",
+    "birthdate": "2025-03-08T21:28:47.100Z"
+  },
+  {
+    "_id": "681b941061307d035f70d922",
+    "username": "lucía784",
+    "password": "pass6328",
+    "city": "Málaga",
+    "birthdate": "2024-06-06T02:36:55.646Z"
+  },
+  {
+    "_id": "681b941061307d035f70d923",
+    "username": "pedro163",
+    "password": "pass3115",
+    "city": "Palma",
+    "birthdate": "2023-12-22T01:37:16.318Z"
+  },
+  {
+    "_id": "681b941061307d035f70d924",
+    "username": "pedro766",
+    "password": "pass7258",
+    "city": "Palma",
+    "birthdate": "2025-04-24T21:02:02.922Z"
+  },
+  {
+    "_id": "681b941061307d035f70d925",
+    "username": "maría594",
+    "password": "pass2602",
+    "city": "Valencia",
+    "birthdate": "2024-01-04T12:38:40.503Z"
+  },
+  {
+    "_id": "681b941061307d035f70d926",
+    "username": "lucía954",
+    "password": "pass7492",
+    "city": "Málaga",
+    "birthdate": "2024-02-01T02:02:24.032Z"
+  },
+  {
+    "_id": "681b941061307d035f70d927",
+    "username": "ana846",
+    "password": "pass3114",
+    "city": "Madrid",
+    "birthdate": "2024-01-29T02:28:34.873Z"
+  },
+  {
+    "_id": "681b941061307d035f70d928",
+    "username": "sofía178",
+    "password": "pass2456",
+    "city": "Palma",
+    "birthdate": "2023-09-23T20:15:16.439Z"
+  },
+  {
+    "_id": "681b941061307d035f70d929",
+    "username": "sofía623",
+    "password": "pass6203",
+    "city": "Málaga",
+    "birthdate": "2024-02-13T20:15:05.602Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92a",
+    "username": "david408",
+    "password": "pass4427",
+    "city": "Barcelona",
+    "birthdate": "2024-04-04T22:46:47.354Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92b",
+    "username": "ana906",
+    "password": "pass7041",
+    "city": "Palma",
+    "birthdate": "2025-01-01T21:31:53.011Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92c",
+    "username": "juan12",
+    "password": "pass4946",
+    "city": "Palma",
+    "birthdate": "2025-04-21T04:49:31.383Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92d",
+    "username": "maría480",
+    "password": "pass1505",
+    "city": "Málaga",
+    "birthdate": "2024-07-28T22:40:59.584Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92e",
+    "username": "pedro680",
+    "password": "pass5248",
+    "city": "Bilbao",
+    "birthdate": "2023-08-04T12:39:55.518Z"
+  },
+  {
+    "_id": "681b941061307d035f70d92f",
+    "username": "lucía814",
+    "password": "pass5648",
+    "city": "Las Palmas",
+    "birthdate": "2024-05-16T20:59:59.195Z"
+  },
+  {
+    "_id": "681b941061307d035f70d930",
+    "username": "ana778",
+    "password": "pass4785",
+    "city": "Bilbao",
+    "birthdate": "2023-07-06T01:41:09.149Z"
+  },
+  {
+    "_id": "681b941061307d035f70d931",
+    "username": "pedro59",
+    "password": "pass6902",
+    "city": "Zaragoza",
+    "birthdate": "2023-08-24T14:07:42.941Z"
+  },
+  {
+    "_id": "681b941061307d035f70d932",
+    "username": "pedro350",
+    "password": "pass7818",
+    "city": "Valencia",
+    "birthdate": "2023-12-07T06:41:18.575Z"
+  },
+  {
+    "_id": "681b941061307d035f70d933",
+    "username": "pedro983",
+    "password": "pass9987",
+    "city": "Palma",
+    "birthdate": "2025-02-21T12:25:05.922Z"
+  },
+  {
+    "_id": "681b941061307d035f70d934",
+    "username": "carlos689",
+    "password": "pass3670",
+    "city": "Las Palmas",
+    "birthdate": "2023-10-17T19:50:33.636Z"
+  },
+  {
+    "_id": "681b941061307d035f70d935",
+    "username": "sofía407",
+    "password": "pass6659",
+    "city": "Zaragoza",
+    "birthdate": "2024-06-16T22:12:56.151Z"
+  },
+  {
+    "_id": "681b941061307d035f70d936",
+    "username": "laura989",
+    "password": "pass5944",
+    "city": "Barcelona",
+    "birthdate": "2023-11-15T10:35:25.193Z"
+  },
+  {
+    "_id": "681b941061307d035f70d937",
+    "username": "laura686",
+    "password": "pass3778",
+    "city": "Bilbao",
+    "birthdate": "2025-02-16T13:00:10.355Z"
+  },
+  {
+    "_id": "681b941061307d035f70d938",
+    "username": "juan722",
+    "password": "pass2096",
+    "city": "Málaga",
+    "birthdate": "2023-12-07T23:35:51.660Z"
+  },
+  {
+    "_id": "681b941061307d035f70d939",
+    "username": "david190",
+    "password": "pass1571",
+    "city": "Bilbao",
+    "birthdate": "2024-10-17T16:06:52.934Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93a",
+    "username": "maría477",
+    "password": "pass9752",
+    "city": "Málaga",
+    "birthdate": "2025-01-26T04:49:37.790Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93b",
+    "username": "maría699",
+    "password": "pass2626",
+    "city": "Palma",
+    "birthdate": "2024-09-24T03:10:19.150Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93c",
+    "username": "lucía843",
+    "password": "pass6926",
+    "city": "Zaragoza",
+    "birthdate": "2024-06-05T22:17:17.711Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93d",
+    "username": "david123",
+    "password": "pass1849",
+    "city": "Barcelona",
+    "birthdate": "2023-10-05T19:18:16.429Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93e",
+    "username": "miguel95",
+    "password": "pass6051",
+    "city": "Sevilla",
+    "birthdate": "2024-01-30T00:04:43.337Z"
+  },
+  {
+    "_id": "681b941061307d035f70d93f",
+    "username": "lucía219",
+    "password": "pass2222",
+    "city": "Sevilla",
+    "birthdate": "2025-04-08T17:27:57.135Z"
+  },
+  {
+    "_id": "681b941061307d035f70d940",
+    "username": "carlos550",
+    "password": "pass2421",
+    "city": "Murcia",
+    "birthdate": "2025-04-17T16:49:19.197Z"
+  },
+  {
+    "_id": "681b941061307d035f70d941",
+    "username": "miguel539",
+    "password": "pass3929",
+    "city": "Málaga",
+    "birthdate": "2023-12-07T13:57:06.329Z"
+  },
+  {
+    "_id": "681b941061307d035f70d942",
+    "username": "carlos598",
+    "password": "pass9623",
+    "city": "Las Palmas",
+    "birthdate": "2023-06-10T10:08:56.595Z"
+  },
+  {
+    "_id": "681b941061307d035f70d943",
+    "username": "david350",
+    "password": "pass8988",
+    "city": "Palma",
+    "birthdate": "2023-06-27T15:40:00.023Z"
+  },
+  {
+    "_id": "681b941061307d035f70d944",
+    "username": "miguel716",
+    "password": "pass9616",
+    "city": "Málaga",
+    "birthdate": "2023-08-17T01:16:00.721Z"
+  },
+  {
+    "_id": "681b941061307d035f70d945",
+    "username": "ana674",
+    "password": "pass8758",
+    "city": "Bilbao",
+    "birthdate": "2023-08-09T17:02:17.955Z"
+  },
+  {
+    "_id": "681b941061307d035f70d946",
+    "username": "ana806",
+    "password": "pass8636",
+    "city": "Valencia",
+    "birthdate": "2025-04-15T06:30:16.225Z"
+  },
+  {
+    "_id": "681b941061307d035f70d947",
+    "username": "sofía35",
+    "password": "pass5112",
+    "city": "Palma",
+    "birthdate": "2024-11-08T07:05:24.682Z"
+  },
+  {
+    "_id": "681b941061307d035f70d948",
+    "username": "pedro736",
+    "password": "pass7889",
+    "city": "Bilbao",
+    "birthdate": "2025-02-27T00:05:38.673Z"
+  }
+]
