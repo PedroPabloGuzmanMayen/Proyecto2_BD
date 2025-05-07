@@ -1,4 +1,4 @@
-
+import mongoose from 'mongoose';
 const ReviewSchema = new mongoose.Schema({
     rating: {
       type: Number,
@@ -22,8 +22,6 @@ const ReviewSchema = new mongoose.Schema({
     }
   }, { timestamps: true });
   
-  // Crear índices
-  ReviewSchema.index({ restaurant_id: 1 });
-  ReviewSchema.index({ user_id: 1, rating: -1 });
+  
   
   module.exports = mongoose.model('Review', ReviewSchema);
