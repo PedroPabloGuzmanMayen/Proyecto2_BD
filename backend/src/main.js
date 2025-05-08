@@ -2,8 +2,16 @@ import express from 'express';
 import mongoose from 'mongoose';
 import users from './models/users.js';
 import restaurants from './models/restaurants.js';
+import cors from 'cors' 
 
 const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:5173',  
+  methods: ['GET','POST','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 const uri = 'mongodb+srv://gaga:hola123@cluster0.phogu.mongodb.net/proyecto2?retryWrites=true&w=majority&appName=Cluster0';
