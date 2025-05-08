@@ -17,6 +17,7 @@ a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
+  margin-right: 10px;
 }
 a:hover {
   color: #535bf2;
@@ -24,14 +25,12 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2.5em;
   line-height: 1.1;
 }
 
@@ -54,6 +53,31 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+nav {
+  padding: 15px;
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav a {
+  color: white;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -64,5 +88,12 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+  nav {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+  nav a {
+    color: #333;
   }
 }
