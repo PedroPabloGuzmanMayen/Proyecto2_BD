@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
       const response = await apiLogin(username, password);
       setUser({ 
         username: response.username,
+        userId: response.userId, // Asegurarse de incluir el userId
         isAdmin: response.username === 'admin'
       });
       return response;
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     user,
     isAuthenticated: !!user,
     isAdmin: user?.isAdmin || false,
+    userId: user?.userId, // Exponer directamente el userId para facilitar su uso
     login,
     register,
     logout,

@@ -1,4 +1,6 @@
 // Definir la URL del backend directamente
+import { normalizeUserData, extractSessionData } from './userUtils';
+
 const API_URL = 'http://localhost:3000';
 
 export const login = async (username, password) => {
@@ -12,7 +14,6 @@ export const login = async (username, password) => {
     });
     
     if (!response.ok) {
-
       const text = await response.text();
       
       console.error('Respuesta no exitosa:', {
@@ -43,13 +44,17 @@ export const login = async (username, password) => {
       throw new Error('El servidor devolvió una respuesta JSON inválida');
     }
     
-    // Guardar información del usuario en localStorage
-    localStorage.setItem('user', JSON.stringify({ 
-      username: data.username,
-      isAdmin: data.username === 'admin'
-    }));
+    // Normalizar los datos del usuario
+    const normalizedUser = normalizeUserData(data);
     
-    return data;
+    // Extraer solo los datos necesarios para la sesión
+    const sessionData = extractSessionData(normalizedUser);
+    
+    // Guardar información del usuario en localStorage
+    localStorage.setItem('user', JSON.stringify(sessionData));
+    
+    // Retornar los datos normalizados para su uso inmediato
+    return normalizedUser;
   } catch (error) {
     console.error('Error en login:', error);
     throw error;
@@ -101,7 +106,7 @@ export const register = async (username, password, userData = {}) => {
       throw new Error('El servidor devolvió una respuesta JSON inválida');
     }
     
-    return data;
+    return normalizeUserData(data);
   } catch (error) {
     console.error('Error en registro:', error);
     throw error;
@@ -117,7 +122,8 @@ export const getCurrentUser = () => {
   if (!userString) return null;
   
   try {
-    return JSON.parse(userString);
+    const userData = JSON.parse(userString);
+    return normalizeUserData(userData); // Normalizar al recuperar
   } catch {
     return null;
   }
