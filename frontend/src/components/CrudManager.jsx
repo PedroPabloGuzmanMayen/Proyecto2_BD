@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createOne, createMany, query, updateOne, updateMany, deleteOne, deleteMany } from '../api/crud.js';
+import '../styles/components.css';
 
 const OPERATIONS = [
   { key: 'createOne',   label: 'Crear 1 documento' },
@@ -63,111 +64,178 @@ export default function CrudManager() {
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: 'monospace' }}>
-      <h1>CRUD</h1>
-
+    <div className="crud-container">
+      <h1>CRUD Manager</h1>
+      
       {/* Selección de Colección y Operación */}
-      <div>
-        <label>Colección: 
-          <input value={coll}
-                 onChange={e => setColl(e.target.value)}
-                 placeholder="e.g. users, restaurants" />
-        </label>
-        <label style={{ marginLeft: 20 }}>Operación:
+      <div className="operation-selector">
+        <div className="form-group">
+          <label>Colección:</label>
+          <input 
+            value={coll}
+            onChange={e => setColl(e.target.value)}
+            placeholder="e.g. users, restaurants" 
+          />
+        </div>
+        <div className="form-group">
+          <label>Operación:</label>
           <select value={op} onChange={e => setOp(e.target.value)}>
             {OPERATIONS.map(o => (
               <option key={o.key} value={o.key}>{o.label}</option>
             ))}
           </select>
-        </label>
+        </div>
       </div>
-
+      
       {/* Inputs variables según operación */}
-      <div style={{ marginTop: 10 }}>
-        {(op === 'createOne') && <>
-          <label>Documento (JSON):</label>
-          <textarea rows={6}
-            value={input.doc || ''}
-            onChange={e => setInput({ ...input, doc: e.target.value })}
-            placeholder='{"username":"juan","city":"Lima",…}'/>
-        </>}
-
-        {(op === 'createMany') && <>
-          <label>Documentos (Array JSON):</label>
-          <textarea rows={6}
-            value={input.docs || ''}
-            onChange={e => setInput({ ...input, docs: e.target.value })}
-            placeholder='[{"…"},{"…"}]'/>
-        </>}
-
-        {(op === 'query') && <>
-          <label>Filtro:</label>
-          <textarea rows={2}
-            value={input.filter || ''}
-            onChange={e => setInput({ ...input, filter: e.target.value })}
-            placeholder='{"city":"Madrid"}'/>
-          <label>Proyección:</label>
-          <textarea rows={2}
-            value={input.projection || ''}
-            onChange={e => setInput({ ...input, projection: e.target.value })}
-            placeholder='{"name":1,"city":1}'/>
-          <label>Orden (sort):</label>
-          <textarea rows={2}
-            value={input.sort || ''}
-            onChange={e => setInput({ ...input, sort: e.target.value })}
-            placeholder='{"name":1}'/>
-          <label>Skip:</label>
-          <input type="number" value={input.skip||''}
-                 onChange={e => setInput({ ...input, skip: e.target.value })}/>
-          <label style={{ marginLeft:10 }}>Limit:</label>
-          <input type="number" value={input.limit||''}
-                 onChange={e => setInput({ ...input, limit: e.target.value })}/>
-        </>}
-
-        {(op === 'updateOne') && <>
-          <label>ID del doc:</label>
-          <input value={input.id||''}
-                 onChange={e => setInput({ ...input, id: e.target.value })}/>
-          <label>Patch (JSON):</label>
-          <textarea rows={4}
-            value={input.patch||''}
-            onChange={e => setInput({ ...input, patch: e.target.value })}
-            placeholder='{"city":"Sevilla"}'/>
-        </>}
-
-        {(op === 'updateMany') && <>
-          <label>Filtro:</label>
-          <textarea rows={2}
-            value={input.filter||''}
-            onChange={e => setInput({ ...input, filter: e.target.value })}/>
-          <label>Patch (JSON):</label>
-          <textarea rows={4}
-            value={input.patch||''}
-            onChange={e => setInput({ ...input, patch: e.target.value })}/>
-        </>}
-
-        {(op === 'deleteOne') && <>
-          <label>ID del doc:</label>
-          <input value={input.id||''}
-                 onChange={e => setInput({ ...input, id: e.target.value })}/>
-        </>}
-
-        {(op === 'deleteMany') && <>
-          <label>Filtro:</label>
-          <textarea rows={2}
-            value={input.filter||''}
-            onChange={e => setInput({ ...input, filter: e.target.value })}/>
-        </>}
+      <div className="section">
+        {(op === 'createOne') && (
+          <div className="form-group">
+            <label>Documento (JSON):</label>
+            <textarea 
+              rows={6}
+              value={input.doc || ''}
+              onChange={e => setInput({ ...input, doc: e.target.value })}
+              placeholder='{"username":"juan","city":"Lima",…}'
+            />
+          </div>
+        )}
+        
+        {(op === 'createMany') && (
+          <div className="form-group">
+            <label>Documentos (Array JSON):</label>
+            <textarea 
+              rows={6}
+              value={input.docs || ''}
+              onChange={e => setInput({ ...input, docs: e.target.value })}
+              placeholder='[{"…"},{"…"}]'
+            />
+          </div>
+        )}
+        
+        {(op === 'query') && (
+          <>
+            <div className="form-group">
+              <label>Filtro:</label>
+              <textarea 
+                rows={2}
+                value={input.filter || ''}
+                onChange={e => setInput({ ...input, filter: e.target.value })}
+                placeholder='{"city":"Madrid"}'
+              />
+            </div>
+            <div className="form-group">
+              <label>Proyección:</label>
+              <textarea 
+                rows={2}
+                value={input.projection || ''}
+                onChange={e => setInput({ ...input, projection: e.target.value })}
+                placeholder='{"name":1,"city":1}'
+              />
+            </div>
+            <div className="form-group">
+              <label>Orden (sort):</label>
+              <textarea 
+                rows={2}
+                value={input.sort || ''}
+                onChange={e => setInput({ ...input, sort: e.target.value })}
+                placeholder='{"name":1}'
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Skip:</label>
+                <input 
+                  type="number" 
+                  value={input.skip || ''}
+                  onChange={e => setInput({ ...input, skip: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Limit:</label>
+                <input 
+                  type="number" 
+                  value={input.limit || ''}
+                  onChange={e => setInput({ ...input, limit: e.target.value })}
+                />
+              </div>
+            </div>
+          </>
+        )}
+        
+        {(op === 'updateOne') && (
+          <>
+            <div className="form-group">
+              <label>ID del doc:</label>
+              <input 
+                value={input.id || ''}
+                onChange={e => setInput({ ...input, id: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>Patch (JSON):</label>
+              <textarea 
+                rows={4}
+                value={input.patch || ''}
+                onChange={e => setInput({ ...input, patch: e.target.value })}
+                placeholder='{"city":"Sevilla"}'
+              />
+            </div>
+          </>
+        )}
+        
+        {(op === 'updateMany') && (
+          <>
+            <div className="form-group">
+              <label>Filtro:</label>
+              <textarea 
+                rows={2}
+                value={input.filter || ''}
+                onChange={e => setInput({ ...input, filter: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>Patch (JSON):</label>
+              <textarea 
+                rows={4}
+                value={input.patch || ''}
+                onChange={e => setInput({ ...input, patch: e.target.value })}
+              />
+            </div>
+          </>
+        )}
+        
+        {(op === 'deleteOne') && (
+          <div className="form-group">
+            <label>ID del doc:</label>
+            <input 
+              value={input.id || ''}
+              onChange={e => setInput({ ...input, id: e.target.value })}
+            />
+          </div>
+        )}
+        
+        {(op === 'deleteMany') && (
+          <div className="form-group">
+            <label>Filtro:</label>
+            <textarea 
+              rows={2}
+              value={input.filter || ''}
+              onChange={e => setInput({ ...input, filter: e.target.value })}
+            />
+          </div>
+        )}
+        
+        <button className="action-button" onClick={handleRun}>
+          Ejecutar Operación
+        </button>
       </div>
-
-      <button style={{ marginTop: 10 }} onClick={handleRun}>
-        Ejecutar
-      </button>
-
+      
       {/* Resultado */}
-      {error && <pre style={{ color: 'red' }}>{error}</pre>}
+      {error && <div className="error">{error}</div>}
+      
       {result !== null && (
-        <div style={{ marginTop: 10 }}>
+        <div className="result-container">
           <h3>Resultado:</h3>
           <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
@@ -175,4 +243,3 @@ export default function CrudManager() {
     </div>
   );
 }
-
