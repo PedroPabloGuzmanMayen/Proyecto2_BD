@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import { v4 as uuidv4 } from 'uuid';
 
 // Modelos
 import users from './models/users.js';
@@ -134,10 +135,11 @@ app.post('/login', async (req, res) => {
 app.post('/register', async (req, res) => {
   const { username, password, city, birthdate } = req.body;
   const existingUser = await users.findOne({ username });
+  const id = uuidv4();
   if (existingUser) {
     return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
   }
-  const newUser = new users({ username, password, city, birthdate });
+  const newUser = new users({ _id: id, username, password, city, birthdate });
   await newUser.save();
   res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
 }
