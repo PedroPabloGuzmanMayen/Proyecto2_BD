@@ -2,6 +2,29 @@ import { useState, useEffect } from 'react';
 import { query, distinctRestaurantCities } from '../api/crud';
 import { useCart } from '../context/CartContext';
 
+// Función para asegurar que los IDs sean strings
+const ensureStringIds = (obj) => {
+  if (!obj) return obj;
+  
+  // Crear una copia para no mutar el original
+  const result = { ...obj };
+  
+  // Convertir _id a string si existe
+  if (result._id) {
+    result._id = String(result._id);
+  }
+  
+  // Si hay un menú, convertir sus IDs también
+  if (Array.isArray(result.menu)) {
+    result.menu = result.menu.map(item => ({
+      ...item,
+      _id: item._id ? String(item._id) : item._id
+    }));
+  }
+  
+  return result;
+};
+
 const RestaurantList = () => {
   // Estados para el componente
   const [restaurants, setRestaurants] = useState([]);
@@ -42,10 +65,12 @@ const RestaurantList = () => {
         
         // Verificar que restaurantsData sea un array
         if (Array.isArray(restaurantsData)) {
-          setRestaurants(restaurantsData);
+          // Convertir los IDs a strings
+          const processedRestaurants = restaurantsData.map(ensureStringIds);
+          setRestaurants(processedRestaurants);
           
           // Extraer ciudades únicas de los restaurantes cargados
-          const uniqueCities = [...new Set(restaurantsData.map(restaurant => restaurant.city))];
+          const uniqueCities = [...new Set(processedRestaurants.map(restaurant => restaurant.city))];
           setCities(uniqueCities);
         } else {
           console.error('La respuesta de restaurantes no es un array:', restaurantsData);
@@ -103,19 +128,23 @@ const RestaurantList = () => {
   
   // Manejar la adición de un item al carrito
   const handleAddToCart = (restaurant, menuItem) => {
-    addToCart(restaurant, menuItem);
+    // Asegurar que los IDs sean strings
+    const processedRestaurant = ensureStringIds(restaurant);
+    const processedMenuItem = { ...menuItem, _id: String(menuItem._id) };
+    
+    addToCart(processedRestaurant, processedMenuItem);
     
     // Mostrar mensaje de confirmación
     setAddedToCartMessages(prev => ({
       ...prev,
-      [`${restaurant._id}-${menuItem._id}`]: true
+      [`${processedRestaurant._id}-${processedMenuItem._id}`]: true
     }));
     
     // Ocultar el mensaje después de 2 segundos
     setTimeout(() => {
       setAddedToCartMessages(prev => ({
         ...prev,
-        [`${restaurant._id}-${menuItem._id}`]: false
+        [`${processedRestaurant._id}-${processedMenuItem._id}`]: false
       }));
     }, 2000);
     
@@ -403,98 +432,105 @@ const RestaurantList = () => {
                       gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
                       gap: '16px' 
                     }}>
-                      {getFilteredMenu(restaurant.menu).map((item, itemIndex) => (
-                        <div 
-                          key={itemIndex} 
-                          style={{
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            padding: '16px',
-                            transition: 'all 0.2s',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            backgroundColor: '#fff',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between'
-                          }}
-                        >
-                          <div>
-                            <div style={{ 
-                              display: 'flex', 
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              marginBottom: '10px'
-                            }}>
-                              <h5 style={{ 
-                                margin: 0, 
-                                fontSize: '16px',
-                                color: '#333'
-                              }}>
-                                {item.name}
-                              </h5>
-                              <span style={{ 
-                                color: '#4caf50', 
-                                fontWeight: 'bold',
-                                backgroundColor: '#f1f8e9',
-                                padding: '4px 8px',
-                                borderRadius: '16px',
-                                fontSize: '14px'
-                              }}>
-                                {item.price.toFixed(2)} €
-                              </span>
-                            </div>
-                            
-                            <p style={{ 
-                              margin: '0 0 16px 0',
-                              color: '#666',
-                              fontSize: '14px',
-                              lineHeight: '1.4'
-                            }}>
-                              {item.description}
-                            </p>
-                          </div>
-                          
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddToCart(restaurant, item);
-                            }}
+                      {getFilteredMenu(restaurant.menu).map((item, itemIndex) => {
+                        // Asegurar que el item._id sea string
+                        const itemId = String(item._id);
+                        const restaurantId = String(restaurant._id);
+                        const messageKey = `${restaurantId}-${itemId}`;
+                        
+                        return (
+                          <div 
+                            key={itemIndex} 
                             style={{
-                              width: '100%',
-                              padding: '10px 0',
-                              backgroundColor: addedToCartMessages[`${restaurant._id}-${item._id}`] 
-                                ? '#8bc34a' 
-                                : '#4caf50',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              padding: '16px',
+                              transition: 'all 0.2s',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              backgroundColor: '#fff',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                              height: '100%',
                               display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '6px',
-                              transition: 'background-color 0.2s',
-                              marginTop: 'auto'
+                              flexDirection: 'column',
+                              justifyContent: 'space-between'
                             }}
                           >
-                            {addedToCartMessages[`${restaurant._id}-${item._id}`] ? (
-                              <>
-                                <span style={{ fontSize: '16px' }}>✓</span>
-                                Añadido
-                              </>
-                            ) : (
-                              <>
-                                <span style={{ fontSize: '16px' }}>🛒</span>
-                                Añadir al carrito
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      ))}
+                            <div>
+                              <div style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                marginBottom: '10px'
+                              }}>
+                                <h5 style={{ 
+                                  margin: 0, 
+                                  fontSize: '16px',
+                                  color: '#333'
+                                }}>
+                                  {item.name}
+                                </h5>
+                                <span style={{ 
+                                  color: '#4caf50', 
+                                  fontWeight: 'bold',
+                                  backgroundColor: '#f1f8e9',
+                                  padding: '4px 8px',
+                                  borderRadius: '16px',
+                                  fontSize: '14px'
+                                }}>
+                                  {item.price.toFixed(2)} €
+                                </span>
+                              </div>
+                              
+                              <p style={{ 
+                                margin: '0 0 16px 0',
+                                color: '#666',
+                                fontSize: '14px',
+                                lineHeight: '1.4'
+                              }}>
+                                {item.description}
+                              </p>
+                            </div>
+                            
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(restaurant, item);
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '10px 0',
+                                backgroundColor: addedToCartMessages[messageKey] 
+                                  ? '#8bc34a' 
+                                  : '#4caf50',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                transition: 'background-color 0.2s',
+                                marginTop: 'auto'
+                              }}
+                            >
+                              {addedToCartMessages[messageKey] ? (
+                                <>
+                                  <span style={{ fontSize: '16px' }}>✓</span>
+                                  Añadido
+                                </>
+                              ) : (
+                                <>
+                                  <span style={{ fontSize: '16px' }}>🛒</span>
+                                  Añadir al carrito
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

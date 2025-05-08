@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import OrderService from '../api/orderService';
+import { query } from '../api/crud';
 import Cart from './Cart';
 
 const Orders = () => {
@@ -8,6 +9,8 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [menuItems, setMenuItems] = useState({});
+  const [restaurants, setRestaurants] = useState({});
   
   // Cargar las órdenes del usuario
   useEffect(() => {
@@ -19,7 +22,10 @@ const Orders = () => {
       
       try {
         setLoading(true);
-        const ordersData = await OrderService.getUserOrders(userId);
+        
+        // Asegurarse de que userId es un string para la consulta
+        const stringUserId = String(userId);
+        const ordersData = await OrderService.getUserOrders(stringUserId);
         
         // Ordenar por fecha de creación (más reciente primero)
         const sortedOrders = Array.isArray(ordersData) 
@@ -27,6 +33,10 @@ const Orders = () => {
           : [];
         
         setOrders(sortedOrders);
+        
+        // Cargar información de restaurantes y productos para mostrarlos en los pedidos
+        await fetchRestaurantsAndMenuItems(sortedOrders);
+        
         setLoading(false);
       } catch (err) {
         console.error('Error al cargar órdenes:', err);
@@ -38,6 +48,53 @@ const Orders = () => {
     fetchOrders();
   }, [userId]);
   
+  // Cargar información de restaurantes y productos para las órdenes
+  const fetchRestaurantsAndMenuItems = async (orders) => {
+    if (!Array.isArray(orders) || orders.length === 0) return;
+    
+    try {
+      // Obtener IDs únicos de restaurantes y productos
+      const restaurantIds = [...new Set(orders.map(order => String(order.restaurant_id)))];
+      
+      const productIds = [];
+      orders.forEach(order => {
+        if (Array.isArray(order.detail)) {
+          order.detail.forEach(item => {
+            if (item.product_id) {
+              productIds.push(String(item.product_id));
+            }
+          });
+        }
+      });
+      
+      // Cargar información de restaurantes
+      if (restaurantIds.length > 0) {
+        const restaurantsData = await query('restaurants', { 
+          filter: { _id: { $in: restaurantIds } } 
+        });
+        
+        const restaurantsMap = {};
+        if (Array.isArray(restaurantsData)) {
+          restaurantsData.forEach(restaurant => {
+            restaurantsMap[String(restaurant._id)] = restaurant;
+            
+            // También guardar información de los menús
+            if (Array.isArray(restaurant.menu)) {
+              const menuMap = {};
+              restaurant.menu.forEach(item => {
+                menuMap[String(item._id)] = item;
+              });
+              setMenuItems(prev => ({ ...prev, ...menuMap }));
+            }
+          });
+          setRestaurants(restaurantsMap);
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar detalles de pedidos:', error);
+    }
+  };
+  
   // Formatear fecha
   const formatDate = (dateString) => {
     const options = { 
@@ -48,6 +105,30 @@ const Orders = () => {
       minute: '2-digit'
     };
     return new Date(dateString).toLocaleDateString('es-ES', options);
+  };
+  
+  // Obtener nombre del producto desde el ID
+  const getProductName = (productId) => {
+    if (!productId) return 'Producto desconocido';
+    
+    const stringId = String(productId);
+    if (menuItems[stringId]) {
+      return menuItems[stringId].name;
+    }
+    
+    return `Producto (ID: ${stringId.substring(stringId.length - 6).toUpperCase()})`;
+  };
+  
+  // Obtener nombre del restaurante desde el ID
+  const getRestaurantName = (restaurantId) => {
+    if (!restaurantId) return 'Restaurante desconocido';
+    
+    const stringId = String(restaurantId);
+    if (restaurants[stringId]) {
+      return restaurants[stringId].name;
+    }
+    
+    return `Restaurante (ID: ${stringId.substring(stringId.length - 6).toUpperCase()})`;
   };
   
   return (
@@ -133,7 +214,7 @@ const Orders = () => {
               }}>
                 <div>
                   <h3 style={{ margin: '0 0 5px 0', fontSize: '16px' }}>
-                    Pedido #{order._id.substring(order._id.length - 6).toUpperCase()}
+                    Pedido #{String(order._id).substring(String(order._id).length - 6).toUpperCase()} - {getRestaurantName(order.restaurant_id)}
                   </h3>
                   <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
                     {formatDate(order.createdAt)}
@@ -168,7 +249,7 @@ const Orders = () => {
                   flexDirection: 'column',
                   gap: '10px'
                 }}>
-                  {order.detail.map((item, itemIndex) => (
+                  {Array.isArray(order.detail) && order.detail.map((item, itemIndex) => (
                     <li 
                       key={itemIndex}
                       style={{
@@ -181,7 +262,7 @@ const Orders = () => {
                     >
                       <div>
                         <span style={{ fontWeight: 'bold' }}>
-                          {item.product_id}
+                          {getProductName(item.product_id)}
                         </span>
                       </div>
                       <div>

@@ -31,15 +31,26 @@ const Cart = () => {
         [restaurantId]: null
       });
       
-      // Preparar los datos de la orden
+      // Preparar los datos de la orden (asegurando que los IDs sean strings)
       const orderData = prepareOrder(restaurantId);
       
       if (!orderData) {
         throw new Error('Error al preparar la orden');
       }
       
+      // Asegurar que los IDs sean strings
+      const processedOrderData = {
+        ...orderData,
+        restaurant_id: String(orderData.restaurant_id),
+        user_id: String(orderData.user_id),
+        detail: orderData.detail.map(item => ({
+          ...item,
+          product_id: String(item.product_id)
+        }))
+      };
+      
       // Crear la orden
-      await OrderService.createOrder(orderData);
+      await OrderService.createOrder(processedOrderData);
       
       // Marcar como exitosa
       setOrderSuccess({

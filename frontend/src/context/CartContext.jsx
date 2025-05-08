@@ -193,20 +193,21 @@ export const CartProvider = ({ children }) => {
     );
   };
   
-  // Preparar la orden para enviar a la API
+  // Preparar la orden para enviar a la API - Ahora asegurando que los IDs sean strings
   const prepareOrder = (restaurantId) => {
     if (!cartItems[restaurantId] || !userId) return null;
     
     const total = getRestaurantTotal(restaurantId);
     
+    // Asegurarse de que todos los IDs sean strings
     return {
       detail: cartItems[restaurantId].items.map(item => ({
-        product_id: item.product_id,
+        product_id: String(item.product_id), // Convertir a string
         quantity: item.quantity
       })),
       total,
-      restaurant_id: restaurantId,
-      user_id: userId
+      restaurant_id: String(restaurantId), // Convertir a string
+      user_id: String(userId) // Convertir a string
     };
   };
   
