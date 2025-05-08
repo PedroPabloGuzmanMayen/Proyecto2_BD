@@ -55,7 +55,7 @@ app.post('/login', async (req, res) => {
   if (user.password !== req.body.password) {
     return res.status(401).json({ succes: false, error: 'Contraseña incorrecta' });
   }
-  res.json({ succes: true, username: user.username, userdID: user._id});
+  res.json({ succes: true, username: user.username, userID: user._id});
 
 });
 
@@ -76,6 +76,18 @@ app.get('/stats/restaurants/cities', async (req, res) => {
   const cities = await restaurants.distinct('city');
   res.json({ cities });
 });
+
+app.post('/userOrder', async (req, res) => {
+  const { userId, orderId } = req.body;
+  const user = await users.findById(userId);
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado' });
+  }
+  user.orders.push(orderId);
+  await user.save();
+  res.json({ message: 'Orden agregada al usuario' });
+}
+);
 
 // Top 5 restaurantes por calificación promedio
 app.get('/stats/restaurants/top-rated', async (req, res) => {
