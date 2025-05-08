@@ -37,6 +37,75 @@ function safeParse(str, fallback) {
   }
 }
 
+// 		*** AGREGACIONES ***
+
+// simples
+// Contar todas las ordenes
+app.get('/stats/orders/count', async (req, res) => {
+  const total = await orders.countDocuments();
+  res.json({ totalOrders: total });
+});
+
+// lista de ciudades únicas donde hay restaurantes
+app.get('/stats/restaurants/cities', async (req, res) => {
+  const cities = await restaurants.distinct('city');
+  res.json({ cities });
+});
+
+// Top 5 restaurantes por calificación promedio
+app.get('/stats/restaurants/top-rated', async (req, res) => {
+  const pipeline = [
+    { $group: {
+        _id: '$restaurant_id',
+        avgRating: { $avg: '$rating' },
+        count:     { $sum: 1 }
+      }
+    },
+    { $sort: { avgRating: -1, count: -1 } },
+    { $limit: 5 },
+    { $lookup: {
+        from: 'restaurants',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'info'
+      }
+    },
+    { $unwind: '$info' },
+    { $project: {
+        _id: 0,
+        restaurant: '$info.name',
+        avgRating: 1,
+        reviews: '$count'
+      }
+    }
+  ];
+  const top = await reviews.aggregate(pipeline);
+  res.json(top);
+});
+
+// Platos más vendidos 
+app.get('/stats/orders/top-dishes', async (req, res) => {
+  const pipeline = [
+    { $unwind: '$detail' },
+    { $group: {
+        _id: '$detail.product_id',
+        totalSold: { $sum: '$detail.quantity' }
+      }
+    },
+    { $sort: { totalSold: -1 } },
+    { $limit: 5 },
+    { $project: {
+        _id: 0,
+        product_id: '$_id',
+        totalSold: 1
+      }
+    }
+  ];
+  const topDishes = await orders.aggregate(pipeline);
+  res.json(topDishes);
+});
+
+
 // Rutas CRUD 
 // Consulta con filtros, proyección, sort, skip, limit
 app.get('/:col', async (req, res) => {
@@ -110,23 +179,6 @@ app.delete('/:col', async (req, res) => {
   const result = await Model.deleteMany(filter);
   res.json(result);
 });
-
-
-// 		*** AGREGACIONES ***
-
-// simples
-// Contar todas las ordenes
-app.get('/stats/orders/count', async (req, res) => {
-  const total = await orders.countDocuments();
-  res.json({ totalOrders: total });
-});
-
-// lista de ciudades únicas donde hay restaurantes
-app.get('/stats/restaurants/cities', async (req, res) => {
-  const cities = await restaurants.distinct('city');
-  res.json({ cities });
-});
-
 
 // Arranque del servidor
 const PORT = 3000;

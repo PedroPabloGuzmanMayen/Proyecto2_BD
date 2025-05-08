@@ -36,3 +36,14 @@ export const deleteOne = (collection, id) =>
 export const deleteMany = (collection, filter) =>
   request(`${collection}`, { method: 'DELETE', body: JSON.stringify({ filter }) });
 
+export const countOrders = () =>
+  request(`stats/orders/count`);
+
+export const distinctRestaurantCities = () =>
+  request(`stats/restaurants/cities`);
+
+export const topRatedRestaurants = () =>
+  request(`stats/restaurants/top-rated`);
+
+export const topDishes = () =>
+  request(`stats/orders/top-dishes`);

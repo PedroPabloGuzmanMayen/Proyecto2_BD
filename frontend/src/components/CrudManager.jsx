@@ -64,7 +64,7 @@ export default function CrudManager() {
 
   return (
     <div style={{ padding: 20, fontFamily: 'monospace' }}>
-      <h1>📦 CRUD Genérico</h1>
+      <h1>CRUD</h1>
 
       {/* Selección de Colección y Operación */}
       <div>
