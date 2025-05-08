@@ -4,6 +4,7 @@ import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
 import { GridFSBucket } from 'mongodb';
 import multer from 'multer';
+import { Readable } from 'stream';
 
 // Modelos
 import users from './models/users.js';
@@ -103,9 +104,17 @@ const getUserOrders = async (userId) => {
 // Conexión a MongoDB
 const uri = 'mongodb+srv://gaga:hola123@cluster0.phogu.mongodb.net/proyecto2?retryWrites=true&w=majority&appName=Cluster0';
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Conectado a MongoDB'))
+  .then(() => {
+    console.log('Conectado a MongoDB');
+    
+    // Inicializar GridFS después de conectar a MongoDB
+    const db = mongoose.connection.db;
+    bucket = new GridFSBucket(db, {
+      bucketName: 'uploads'
+    });
+    console.log('GridFS inicializado correctamente');
+  })
   .catch(err => console.error('Error al conectar a MongoDB:', err));
-
 // Map de colecciones
 const models = { users, restaurants, orders, reviews };
 
