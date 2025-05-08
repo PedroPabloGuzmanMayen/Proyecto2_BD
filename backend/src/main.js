@@ -288,7 +288,7 @@ app.post('/register', async (req, res) => {
   if (existingUser) {
     return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
   }
-  const newUser = new users({ id, username, password, city, birthdate });
+  const newUser = new users({ _id: id, username, password, city, birthdate });
   await newUser.save();
   res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
 }
