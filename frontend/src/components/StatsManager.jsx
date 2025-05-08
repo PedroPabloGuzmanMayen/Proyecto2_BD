@@ -98,20 +98,6 @@ export default function StatsManager() {
             </button>
           </div>
           
-          <div className="menu-operation">
-            <h3>Añadir Tag (sin duplicados)</h3>
-            <div className="form-group">
-              <label>Tag:</label>
-              <input
-                placeholder="Tag"
-                value={tag}
-                onChange={e => setTag(e.target.value)}
-              />
-            </div>
-            <button onClick={async () => setOutput(await addTag(rid, tag))}>
-              $addToSet(tags)
-            </button>
-          </div>
         </div>
       </div>
       
@@ -122,32 +108,6 @@ export default function StatsManager() {
         <h2>Documentos Embebidos (menu)</h2>
         
         <div className="menu-operations">
-          <div className="menu-operation">
-            <h3>Filtrar por Precio Mínimo</h3>
-            
-            <div className="form-group">
-              <label>ID de Restaurante:</label>
-              <input
-                placeholder="Restaurant ID"
-                value={rid}
-                onChange={e => setRid(e.target.value)}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Precio Mínimo:</label>
-              <input
-                type="number"
-                placeholder="Precio Mínimo"
-                value={minPrice}
-                onChange={e => setMinPrice(Number(e.target.value))}
-              />
-            </div>
-            
-            <button onClick={async () => setOutput(await getExpensiveDishes(rid, minPrice))}>
-              Pipeline Embebido
-            </button>
-          </div>
           
           <div className="menu-operation">
             <h3>Actualizar Precio de Item</h3>
