@@ -19,6 +19,78 @@ app.use(cors({
 
 app.use(express.json());
 
+const getUserOrders = async (userId) => {
+  try {
+    const orders = await mongoose.model('orders').aggregate([
+      // Filtrar por user_id específico
+      {
+        $match: {
+          user_id: userId
+        }
+      },
+      // Lookup para obtener información del restaurante
+      {
+        $lookup: {
+          from: 'restaurants',
+          localField: 'restaurant_id',
+          foreignField: '_id',
+          as: 'restaurant'
+        }
+      },
+      // Descomponer el array de detalles para procesarlos individualmente
+      {
+        $unwind: '$detail'
+      },
+      // Lookup para obtener información del producto
+      {
+        $lookup: {
+          from: 'products', // O el nombre de tu colección de productos
+          localField: 'detail.product_id',
+          foreignField: '_id',
+          as: 'product'
+        }
+      },
+      // Reformatear los resultados
+      {
+        $project: {
+          _id: 1,
+          total: 1,
+          restaurant_name: { $arrayElemAt: ['$restaurant.name', 0] },
+          product_name: { $arrayElemAt: ['$product.name', 0] },
+          product_id: '$detail.product_id',
+          quantity: '$detail.quantity',
+          created_at: '$createdAt'
+        }
+      },
+      // Reagrupar por orden para mantener los detalles juntos
+      {
+        $group: {
+          _id: '$_id',
+          total: { $first: '$total' },
+          restaurant_name: { $first: '$restaurant_name' },
+          created_at: { $first: '$created_at' },
+          details: {
+            $push: {
+              product_name: '$product_name',
+              product_id: '$product_id',
+              quantity: '$quantity'
+            }
+          }
+        }
+      },
+      // Ordenar por fecha de creación (más reciente primero)
+      {
+        $sort: { created_at: -1 }
+      }
+    ]);
+    
+    return orders;
+  } catch (error) {
+    console.error('Error al obtener las órdenes del usuario:', error);
+    throw error;
+  }
+};
+
 // Conexión a MongoDB
 const uri = 'mongodb+srv://gaga:hola123@cluster0.phogu.mongodb.net/proyecto2?retryWrites=true&w=majority&appName=Cluster0';
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -86,6 +158,17 @@ app.post('/userOrder', async (req, res) => {
   user.orders.push(orderId);
   await user.save();
   res.json({ message: 'Orden agregada al usuario' });
+}
+);
+
+app.get('/userOrders/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const user = await users.findById(userId);
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado' });
+  }
+  const orders = await getUserOrders(userId);
+  res.json(orders);
 }
 );
 

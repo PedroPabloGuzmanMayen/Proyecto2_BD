@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const OrderDetailSchema = new mongoose.Schema({
     product_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       required: true
     },
     quantity: {
@@ -18,12 +18,12 @@ const OrderDetailSchema = new mongoose.Schema({
       required: true
     },
     restaurant_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'Restaurant',
       required: true
     },
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true
     }
