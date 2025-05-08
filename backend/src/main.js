@@ -139,7 +139,7 @@ app.post('/register', async (req, res) => {
   if (existingUser) {
     return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
   }
-  const newUser = new users({ _id: id, username, password, city, birthdate });
+  const newUser = new users({ id, username, password, city, birthdate });
   await newUser.save();
   res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
 }
@@ -165,7 +165,8 @@ app.post('/userOrder', async (req, res) => {
 
 app.get('/userOrders/:userId', async (req, res) => {
   const userId = req.params.userId;
-  const user = await users.findById(userId);
+  const user = await users.findOne({ _id: userId });
+
   if (!user) {
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
