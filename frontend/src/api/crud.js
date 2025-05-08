@@ -47,3 +47,29 @@ export const topRatedRestaurants = () =>
 
 export const topDishes = () =>
   request(`stats/orders/top-dishes`);
+
+export const addMenuItem = (restaurantId, item) =>
+  request(`restaurants/${restaurantId}/menu/add`, {
+    method: 'POST',
+    body: JSON.stringify(item)
+  });
+
+export const removeMenuItem = (restaurantId, itemId) =>
+  request(`restaurants/${restaurantId}/menu/remove/${itemId}`, {
+    method: 'DELETE'
+  });
+
+export const addTag = (restaurantId, tag) =>
+  request(`restaurants/${restaurantId}/tags`, {
+    method: 'PATCH',
+    body: JSON.stringify({ tag })
+  });
+
+export const getExpensiveDishes = (restaurantId, minPrice) =>
+  request(`reports/restaurants/${restaurantId}/expensive-dishes?minPrice=${minPrice}`);
+
+export const updateMenuItemPrice = (restaurantId, itemId, newPrice) =>
+  request(`restaurants/${restaurantId}/menu/${itemId}/price`, {
+    method: 'PATCH',
+    body: JSON.stringify({ newPrice })
+  });

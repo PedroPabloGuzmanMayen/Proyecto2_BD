@@ -105,6 +105,70 @@ app.get('/stats/orders/top-dishes', async (req, res) => {
   res.json(topDishes);
 });
 
+// Arrays
+
+// agregar un nuevo platillo al menú
+app.post('/restaurants/:id/menu/add', async (req, res) => {
+  const { name, price, description } = req.body;
+  const updated = await restaurants.findByIdAndUpdate(
+    req.params.id,
+    { $push: { menu: { name, price, description } } },
+    { new: true }
+  );
+  res.json(updated);
+});
+
+// eliminar un platillo por su _id
+app.delete('/restaurants/:id/menu/remove/:itemId', async (req, res) => {
+  const updated = await restaurants.findByIdAndUpdate(
+    req.params.id,
+    { $pull: { menu: { _id: req.params.itemId } } },
+    { new: true }
+  );
+  res.json(updated);
+});
+
+// añadir un tag 
+app.patch('/restaurants/:id/tags', async (req, res) => {
+  const { tag } = req.body;
+  const updated = await restaurants.findByIdAndUpdate(
+    req.params.id,
+    { $addToSet: { tags: tag } },
+    { new: true }
+  );
+  res.json(updated);
+});
+
+// Embebidos
+// filtrar menú embebido en pipeline
+app.get('/reports/restaurants/:id/expensive-dishes', async (req, res) => {
+  const priceThreshold = Number(req.query.minPrice) || 20;
+  const pipeline = [
+    { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+    { $unwind: '$menu' },
+    { $match: { 'menu.price': { $gte: priceThreshold } } },
+    { $project: {
+        _id: 0,
+        dish: '$menu.name',
+        price: '$menu.price'
+      }
+    }
+  ];
+  const dishes = await restaurants.aggregate(pipeline);
+  res.json(dishes);
+});
+
+// actualizar un campo dentro de un documento embebido 
+app.patch('/restaurants/:id/menu/:itemId/price', async (req, res) => {
+  const { newPrice } = req.body;
+  const updated = await restaurants.findOneAndUpdate(
+    { _id: req.params.id, 'menu._id': req.params.itemId },
+    { $set: { 'menu.$.price': newPrice } },
+    { new: true }
+  );
+  res.json(updated);
+});
+
 
 // Rutas CRUD 
 // Consulta con filtros, proyección, sort, skip, limit
