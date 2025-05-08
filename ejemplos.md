@@ -1,123 +1,231 @@
-# Ejemplos por operación
+Claro, vamos a probar sistemáticamente cada una de las opciones en los componentes CrudManager y StatsManager. Te guiaré paso a paso sobre cómo utilizar cada funcionalidad.
 
-## 1. Crear 1 documento (createOne)
+# Pruebas para CrudManager
 
-**Colección:** users
+Vamos a probar cada operación CRUD en el orden natural de creación, consulta, actualización y eliminación.
 
-**Documento (JSON):**
+## 1. Crear documentos
+
+### Opción 1: Crear 1 documento (createOne)
+
+1. **Colección**: Escribe `restaurants`
+2. **Operación**: Selecciona `Crear 1 documento`
+3. **Documento (JSON)**: Ingresa el siguiente JSON:
 ```json
 {
-  "username": "juan123",
-  "password": "es_un_secreto_chen",
-  "city": "Bogotá",
-  "birthdate": "1990-05-10T00:00:00.000Z"
+  "name": "La Parrilla Argentina",
+  "city": "Madrid",
+  "rating": 4.7,
+  "tags": ["parrilla", "carne", "argentino"],
+  "menu": [
+    {
+      "name": "Bife de Chorizo",
+      "price": 22.50,
+      "description": "300g de carne a la parrilla"
+    },
+    {
+      "name": "Empanadas",
+      "price": 8.90,
+      "description": "4 unidades de carne o queso"
+    }
+  ]
 }
 ```
+4. Haz clic en **Ejecutar Operación**
+5. Deberías recibir un resultado exitoso con el documento creado, incluyendo un ID generado
 
-**Resultado esperado:** la interfaz te devuelve ese mismo json.
+### Opción 2: Crear varios documentos (createMany)
 
-## 2. Crear varios documentos (createMany)
-
-**Colección:** restaurants
-
-**Documentos (Array JSON):**
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Crear varios documentos`
+3. **Documentos (Array JSON)**: Ingresa el siguiente array:
 ```json
 [
   {
-    "name": "Sushi Bar",
-    "location": { "coordinates": [-58.3816, -34.6037] },
-    "city": "Buenos Aires",
-    "description": "Especialidad en sushi fresco",
-    "menu": [
-      { "name": "Sushi Rolls", "price": 12.5, "description": "Rollo variado" }
-    ]
+    "username": "maria_garcia",
+    "name": "María García",
+    "email": "maria@example.com",
+    "city": "Barcelona",
+    "age": 28
   },
   {
-    "name": "Pasta House",
-    "location": { "coordinates": [-74.006, 40.7128] },
-    "city": "New York",
-    "description": "Pastas artesanales",
-    "menu": [
-      { "name": "Spaghetti", "price": 10.0, "description": "Con salsa boloñesa" }
-    ]
+    "username": "juan_lopez",
+    "name": "Juan López",
+    "email": "juan@example.com",
+    "city": "Madrid",
+    "age": 34
+  },
+  {
+    "username": "ana_martinez",
+    "name": "Ana Martínez",
+    "email": "ana@example.com",
+    "city": "Barcelona",
+    "age": 31
   }
 ]
 ```
+4. Haz clic en **Ejecutar Operación**
+5. Deberías recibir un resultado con la confirmación de que se crearon 3 documentos
 
-**Resultado esperado:** un array con ambos documentos creados.
+## 2. Consultar documentos (query)
 
-## 3. Consultar documentos (query)
-
-**Colección:** orders
-
-**Filtro** (por ejemplo, todas las órdenes de un usuario, pero es mejor agarrar un id al hacer una consulta a todo):
-
-El equivalente al select * from n;
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Consultar (filtros/…)`
+3. **Filtro**: Para obtener solo usuarios de Barcelona:
 ```json
-filtro: {}
-proyeccion: {}
-orden: {}
-skip: [dejenlo vacio]
-limit: [dejenlo vacio]
+{"city": "Barcelona"}
 ```
-
+4. **Proyección**: Para mostrar solo algunos campos:
 ```json
-{ "user_id": "681b941061307d035f70d8fc" }
+{"name": 1, "email": 1, "city": 1}
 ```
-
-**Proyección** (solo detail y total):
+5. **Orden (sort)**: Para ordenar por nombre:
 ```json
-{ "detail": 1, "total": 1 }
+{"name": 1}
 ```
+6. **Skip**: Deja en blanco o pon `0`
+7. **Limit**: Ingresa `10`
+8. Haz clic en **Ejecutar Operación**
+9. Deberías obtener los usuarios de Barcelona con solo los campos especificados
 
-**Orden** (por total descendente):
+## 3. Actualizar documentos
+
+### Opción 1: Actualizar 1 documento (updateOne)
+
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Actualizar 1 documento`
+3. **ID del doc**: Ingresa el ID de uno de los usuarios que obtuviste en la consulta anterior
+4. **Patch (JSON)**:
 ```json
-{ "total": -1 }
+{
+  "age": 29,
+  "lastLogin": "2025-05-08"
+}
 ```
+5. Haz clic en **Ejecutar Operación**
+6. Deberías ver la confirmación de que el documento fue actualizado
 
-**Skip:** 0
+### Opción 2: Actualizar varios documentos (updateMany)
 
-**Limit:** 5
-
-## 4. Actualizar 1 documento (updateOne)
-
-**Colección:** reviews
-
-**ID del doc:** poner aquí el _id exacto de la review a modificar
-
-**Resultado:** el documento actualizado (nuevo valor de rating y comment).
-
-## 5. Actualizar varios documentos (updateMany)
-
-**Colección:** users
-
-**Filtro** (todos los usuarios de "Málaga"):
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Actualizar varios documentos`
+3. **Filtro**:
 ```json
-{ "city": "Málaga" }
+{"city": "Barcelona"}
 ```
-
-**Patch (JSON):**
+4. **Patch (JSON)**:
 ```json
-{ "city": "Málaga, España" }
+{
+  "country": "España",
+  "updatedAt": "2025-05-08"
+}
 ```
+5. Haz clic en **Ejecutar Operación**
+6. Deberías ver la confirmación de cuántos documentos fueron actualizados
 
-**Resultado:** un objeto con { acknowledged, modifiedCount, matchedCount }.
+## 4. Eliminar documentos
 
-## 6. Eliminar 1 documento (deleteOne)
+### Opción 1: Eliminar 1 documento (deleteOne)
 
-**Colección:** restaurants
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Eliminar 1 documento`
+3. **ID del doc**: Ingresa el ID de uno de los usuarios
+4. Haz clic en **Ejecutar Operación**
+5. Deberías ver la confirmación de que el documento fue eliminado
 
-**ID del doc:** el _id del restaurante que quieres borrar, e.g. 681b941061307d035f70d949
+### Opción 2: Eliminar varios documentos (deleteMany)
 
-**Resultado:** el objeto borrado.
-
-## 7. Eliminar varios documentos (deleteMany)
-
-**Colección:** orders
-
-**Filtro** (todas las órdenes con total menor a 10):
+1. **Colección**: Escribe `users`
+2. **Operación**: Selecciona `Eliminar varios documentos`
+3. **Filtro**: Para eliminar usuarios de Madrid:
 ```json
-{ "total": { "$lt": 10 } }
+{"city": "Madrid"}
 ```
+4. Haz clic en **Ejecutar Operación**
+5. Deberías ver la confirmación de cuántos documentos fueron eliminados
 
-**Resultado:** un objeto con { acknowledged, deletedCount }.
+# Pruebas para StatsManager
+
+Ahora vamos a probar las funcionalidades del StatsManager.
+
+## 1. Consultas Estadísticas
+
+Prueba cada uno de los botones de la sección "Consultas Estadísticas":
+
+### Contar Órdenes
+1. Haz clic en el botón **Contar Órdenes**
+2. Deberías ver el número total de órdenes en la base de datos
+
+### Ciudades de Restaurantes
+1. Haz clic en el botón **Ciudades de Restaurantes**
+2. Deberías ver una lista de ciudades únicas donde hay restaurantes
+
+### Top 5 Restaurantes
+1. Haz clic en el botón **Top 5 Restaurantes**
+2. Deberías ver una lista de los 5 restaurantes mejor valorados
+
+### Platos Más Vendidos
+1. Haz clic en el botón **Platos Más Vendidos**
+2. Deberías ver un ranking de los platos más populares
+
+## 2. Operaciones con Menú de Restaurante
+
+Vamos a utilizar el ID del restaurante que creamos anteriormente:
+
+### Añadir Platillo
+1. **ID de Restaurante**: Ingresa el ID del restaurante "La Parrilla Argentina" que creamos
+2. **Añadir Platillo**: Ingresa el siguiente JSON:
+```json
+{
+  "name": "Provoleta",
+  "price": 12.50,
+  "description": "Queso provolone a la parrilla con orégano y aceite de oliva"
+}
+```
+3. Haz clic en el botón **$push(menu)**
+4. Deberías ver la confirmación de que el platillo fue añadido
+
+### Añadir Tag (sin duplicados)
+1. **ID de Restaurante**: Mantén el mismo ID
+2. **Tag**: Escribe `vegetariano`
+3. Haz clic en el botón **$addToSet(tags)**
+4. Deberías ver la confirmación de que el tag fue añadido
+
+### Filtrar por Precio Mínimo
+1. **ID de Restaurante**: Mantén el mismo ID
+2. **Precio Mínimo**: Ingresa `15`
+3. Haz clic en el botón **Pipeline Embebido**
+4. Deberías ver los platos que cuestan 15 o más
+
+### Actualizar Precio de Item
+1. **ID de Restaurante**: Mantén el mismo ID
+2. **ID del Platillo**: Ingresa el ID del platillo "Bife de Chorizo" (deberás obtenerlo de una consulta previa)
+3. **Nuevo Precio**: Ingresa `24.90`
+4. Haz clic en el botón **$set(menu.$.price)**
+5. Deberías ver la confirmación de que el precio fue actualizado
+
+### Eliminar Platillo
+1. **ID de Restaurante**: Mantén el mismo ID
+2. **ID del Platillo**: Ingresa el ID del platillo "Empanadas"
+3. Haz clic en el botón **$pull(menu)**
+4. Deberías ver la confirmación de que el platillo fue eliminado
+
+## Verificación final
+
+Para verificar que todo funciona correctamente, realiza una consulta final:
+
+1. Vuelve al CrudManager
+2. **Colección**: Escribe `restaurants`
+3. **Operación**: Selecciona `Consultar (filtros/…)`
+4. **Filtro**: 
+```json
+{"name": "La Parrilla Argentina"}
+```
+5. Haz clic en **Ejecutar Operación**
+6. Deberías ver el restaurante con todos los cambios aplicados:
+   - El nuevo platillo "Provoleta" añadido
+   - El tag "vegetariano" añadido
+   - El precio actualizado del "Bife de Chorizo"
+   - El platillo "Empanadas" eliminado (si realizaste esta operación)
+
+¿Quieres que profundice en alguna operación específica o necesitas ayuda con algún problema que hayas encontrado durante las pruebas?
