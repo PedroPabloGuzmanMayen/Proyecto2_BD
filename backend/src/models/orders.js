@@ -28,3 +28,6 @@ const OrderDetailSchema = new mongoose.Schema({
       required: true
     }
   }, { timestamps: true });
+
+const orders = mongoose.model('orders', OrderSchema);
+export default orders;
