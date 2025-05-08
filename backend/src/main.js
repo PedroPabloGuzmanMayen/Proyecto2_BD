@@ -312,12 +312,19 @@ app.get('/:col', async (req, res) => {
 
 // Crear un documento
 app.post('/:col', async (req, res) => {
-  const Model = models[req.params.col];
+  const col = req.params.col;
+  const Model = models[col];
   if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const bodyWithId = { _id: uuidv4(), ...req.body };  // <-- aquí se agrega el _id
-  const doc = new Model(bodyWithId);
+  const body = structuredClone(req.body);
+  body._id = uuidv4();
 
+  // Solo si la colección es "restaurant"
+  if (col === 'restaurants' && Array.isArray(body.menu)) {
+    body.menu = body.menu.map(item => ({ _id: uuidv4(), ...item }));
+  }
+
+  const doc = new Model(body);
   await doc.save();
   res.json(doc);
 });
