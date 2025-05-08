@@ -11,9 +11,8 @@ export const login = async (username, password) => {
       body: JSON.stringify({ username, password })
     });
     
-    // Error handling - leer la respuesta antes de convertirla a JSON
     if (!response.ok) {
-      // Si es HTML, mostrará el inicio para depuración
+
       const text = await response.text();
       
       console.error('Respuesta no exitosa:', {
@@ -57,14 +56,17 @@ export const login = async (username, password) => {
   }
 };
 
-export const register = async (username, password) => {
+export const register = async (username, password, userData = {}) => {
   try {
     console.log(`Intentando registro en: ${API_URL}/register`);
     
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, 
+        password,
+        city: userData.birthCity,
+        birthdate: userData.birthDate })
     });
     
     // Error handling

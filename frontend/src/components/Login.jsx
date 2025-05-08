@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [birthCity, setBirthCity] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState('login'); // 'login' o 'register'
@@ -22,11 +24,18 @@ export default function Login() {
         await login(username, password);
         navigate('/');
       } else {
-        await register(username, password);
+        // Para el registro, incluimos fecha y ciudad de nacimiento
+        await register(username, password, {
+          birthDate,
+          birthCity
+        });
         setMode('login');
         setError('');
         // Mostrar mensaje de éxito
         alert('Usuario registrado con éxito. Ahora puedes iniciar sesión.');
+        // Limpiar campos para el login
+        setBirthDate('');
+        setBirthCity('');
       }
     } catch (err) {
       setError(err.message);
@@ -77,7 +86,7 @@ export default function Login() {
           />
         </div>
         
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '15px' }}>
           <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
             Contraseña
           </label>
@@ -95,6 +104,49 @@ export default function Login() {
             }}
           />
         </div>
+        
+        {/* Campos adicionales solo para el registro */}
+        {mode === 'register' && (
+          <>
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="birthDate" style={{ display: 'block', marginBottom: '5px' }}>
+                Fecha de nacimiento
+              </label>
+              <input
+                id="birthDate"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                required
+                style={{ 
+                  width: '100%', 
+                  padding: '8px', 
+                  borderRadius: '4px',
+                  border: '1px solid #ccc'
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="birthCity" style={{ display: 'block', marginBottom: '5px' }}>
+                Ciudad de nacimiento
+              </label>
+              <input
+                id="birthCity"
+                type="text"
+                value={birthCity}
+                onChange={(e) => setBirthCity(e.target.value)}
+                required
+                style={{ 
+                  width: '100%', 
+                  padding: '8px', 
+                  borderRadius: '4px',
+                  border: '1px solid #ccc'
+                }}
+              />
+            </div>
+          </>
+        )}
         
         <button 
           type="submit" 

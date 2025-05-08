@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (username, password) => {
+  const register = async (username, password, userData = {}) => {
     try {
-      return await apiRegister(username, password);
+      return await apiRegister(username, password, userData);
     } catch (error) {
       throw error;
     }
