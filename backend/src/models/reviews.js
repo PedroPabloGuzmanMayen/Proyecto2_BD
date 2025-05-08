@@ -21,7 +21,9 @@ const ReviewSchema = new mongoose.Schema({
       required: true
     }
   }, { timestamps: true });
-  
-  
-const reviews = mongoose.model('reviews', ReviewSchema);
-export default reviews;  
+// Indices para reviews
+
+ReviewSchema.index({ restaurant_id: 1, rating: -1 });
+ReviewSchema.index({ user_id: 1, rating: 1 });
+
+export default mongoose.model('reviews', ReviewSchema);

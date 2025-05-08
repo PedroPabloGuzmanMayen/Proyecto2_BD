@@ -29,5 +29,8 @@ const OrderDetailSchema = new mongoose.Schema({
     }
   }, { timestamps: true });
 
-const orders = mongoose.model('orders', OrderSchema);
-export default orders;
+// Indices
+OrderSchema.index({ 'detail.product_id': 1 }); // multikey
+OrderSchema.index({ restaurant_id: 1, total: -1 });
+
+export default mongoose.model('orders', OrderSchema);

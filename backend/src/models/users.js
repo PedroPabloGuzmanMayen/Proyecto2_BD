@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Crear índices
+UserSchema.index({ city: 1 });
+UserSchema.index({ username: 'text', city: 'text' });
 
-
-const users = mongoose.model('users', UserSchema);
-export default users;
+export default mongoose.model('users', UserSchema);

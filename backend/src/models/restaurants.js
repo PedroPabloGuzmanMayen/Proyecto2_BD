@@ -13,7 +13,7 @@ const MenuItemSchema = new mongoose.Schema({
       type: String,
       required: true
     }
-  });
+});
   
   const RestaurantSchema = new mongoose.Schema({
     name: {
@@ -40,12 +40,13 @@ const MenuItemSchema = new mongoose.Schema({
       required: true
     },
     menu: [MenuItemSchema]
-  }, { timestamps: true });
-  
-  // Crear índices
-  RestaurantSchema.index({ "location.coordinates": "2dsphere" });
-  RestaurantSchema.index({ city: 1, name: 1 });
-  RestaurantSchema.index({ "menu._id": 1 });
-  
- const restaurants = mongoose.model('restaurants', RestaurantSchema);
- export default restaurants;
+}, { timestamps: true });
+
+
+// Crear índices
+RestaurantSchema.index({ "location.coordinates": "2dsphere" });
+RestaurantSchema.index({ city: 1, name: 1 });
+RestaurantSchema.index({ "menu._id": 1 });
+RestaurantSchema.index({ 'menu.name': 1 });
+
+export default mongoose.model('restaurants', RestaurantSchema);
