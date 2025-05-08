@@ -2,22 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import RestaurantList from './RestaurantList';
 import Orders from './Orders';
-
-// Componente para reviews (placeholder)
-const ReviewsList = () => (
-  <div>
-    <h2 style={{ 
-      fontSize: '1.5rem', 
-      marginBottom: '20px', 
-      color: '#333',
-      borderBottom: '2px solid #f0f0f0',
-      paddingBottom: '10px'
-    }}>
-      Mis Reviews
-    </h2>
-    <p style={{ color: '#666' }}>Aquí se mostrarán las reseñas que has escrito.</p>
-  </div>
-);
+import ReviewsList from './Reviews'; // Importa el nuevo componente
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
@@ -109,7 +94,7 @@ export default function CustomerDashboard() {
         }}>
           {activeTab === 'restaurants' && <RestaurantList />}
           {activeTab === 'orders' && <Orders />}
-          {activeTab === 'reviews' && <ReviewsList />}
+          {activeTab === 'reviews' && <ReviewsList />} {/* Usa el componente aquí */}
         </div>
       </div>
     </div>

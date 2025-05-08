@@ -53,7 +53,7 @@ const OrderService = {
       // Asegurar que el userId es un string
       const stringUserId = String(userId);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders?filter=${JSON.stringify({ user_id: stringUserId })}`);
+      const response = await fetch(`http://localhost:3000/userOrders/${stringUserId}`);
       if (!response.ok) throw new Error('Error al obtener órdenes');
       return await response.json();
     } catch (error) {

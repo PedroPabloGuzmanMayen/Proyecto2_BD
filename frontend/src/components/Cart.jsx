@@ -170,7 +170,7 @@ const Cart = () => {
                   >
                     <div style={{ flex: 2 }}>
                       <h4 style={{ margin: '0 0 5px 0', fontSize: '16px' }}>{item.name}</h4>
-                      <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+                      <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>
                         {item.price.toFixed(2)} € por unidad
                       </p>
                     </div>
