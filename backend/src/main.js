@@ -37,7 +37,7 @@ function safeParse(str, fallback) {
   }
 }
 
-// Rutas CRUD genéricas
+// Rutas CRUD 
 // Consulta con filtros, proyección, sort, skip, limit
 app.get('/:col', async (req, res) => {
   const Model = models[req.params.col];
@@ -110,6 +110,23 @@ app.delete('/:col', async (req, res) => {
   const result = await Model.deleteMany(filter);
   res.json(result);
 });
+
+
+// 		*** AGREGACIONES ***
+
+// simples
+// Contar todas las ordenes
+app.get('/stats/orders/count', async (req, res) => {
+  const total = await orders.countDocuments();
+  res.json({ totalOrders: total });
+});
+
+// lista de ciudades únicas donde hay restaurantes
+app.get('/stats/restaurants/cities', async (req, res) => {
+  const cities = await restaurants.distinct('city');
+  res.json({ cities });
+});
+
 
 // Arranque del servidor
 const PORT = 3000;
