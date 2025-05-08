@@ -46,6 +46,31 @@ app.get('/stats/orders/count', async (req, res) => {
   res.json({ totalOrders: total });
 });
 
+//login
+app.post('/login', async (req, res) => {
+  const user = await users.findOne({ username: req.body.username });
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado' });
+  }
+  if (user.password !== req.body.password) {
+    return res.status(401).json({ error: 'Contraseña incorrecta' });
+  }
+  res.json({ succes: true, username: user.username });
+
+});
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const existingUser = await users.findOne({ username });
+  if (existingUser) {
+    return res.status(400).json({ error: 'El usuario ya existe' });
+  }
+  const newUser = new users({ username, password });
+  await newUser.save();
+  res.status(201).json({ message: 'Usuario creado con éxito' });
+}
+);
+
 // lista de ciudades únicas donde hay restaurantes
 app.get('/stats/restaurants/cities', async (req, res) => {
   const cities = await restaurants.distinct('city');
