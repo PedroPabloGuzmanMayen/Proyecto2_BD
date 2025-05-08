@@ -207,7 +207,7 @@ app.get('/stats/restaurants/top-rated', async (req, res) => {
 });
 
 // Platos más vendidos 
-app.get('/stats/orders/top-dishes', async (req, res) => {
+app.get('/stats/orders/top-dishes', async (req,res) => {
   const pipeline = [
     { $unwind: '$detail' },
     { $group: {
@@ -217,16 +217,31 @@ app.get('/stats/orders/top-dishes', async (req, res) => {
     },
     { $sort: { totalSold: -1 } },
     { $limit: 5 },
+    // Buscar el nombre del platillo dentro de su restaurante
+    { $lookup: {
+        from: 'restaurants',
+        let: { pid: '$_id' },
+        pipeline: [
+          { $unwind: '$menu' },
+          { $match: { $expr: { $eq: ['$menu._id', '$$pid'] } } },
+          { $project: { _id: 0, name: '$menu.name' } }
+        ],
+        as: 'itemInfo'
+      }
+    },
+    { $unwind: '$itemInfo' },
     { $project: {
         _id: 0,
         product_id: '$_id',
+        name: '$itemInfo.name',
         totalSold: 1
       }
     }
   ];
-  const topDishes = await orders.aggregate(pipeline);
-  res.json(topDishes);
+  const top = await orders.aggregate(pipeline);
+  res.json(top);
 });
+
 
 // Arrays
 
