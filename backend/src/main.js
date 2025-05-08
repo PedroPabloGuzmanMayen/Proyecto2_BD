@@ -55,7 +55,7 @@ app.post('/login', async (req, res) => {
   if (user.password !== req.body.password) {
     return res.status(401).json({ succes: false, error: 'Contraseña incorrecta' });
   }
-  res.json({ succes: true, username: user.username });
+  res.json({ succes: true, username: user.username, userdID: user._id});
 
 });
 
