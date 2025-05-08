@@ -50,24 +50,24 @@ app.get('/stats/orders/count', async (req, res) => {
 app.post('/login', async (req, res) => {
   const user = await users.findOne({ username: req.body.username });
   if (!user) {
-    return res.status(404).json({ error: 'Usuario no encontrado' });
+    return res.status(404).json({ succes: false, error: 'Usuario no encontrado' });
   }
   if (user.password !== req.body.password) {
-    return res.status(401).json({ error: 'Contraseña incorrecta' });
+    return res.status(401).json({ succes: false, error: 'Contraseña incorrecta' });
   }
   res.json({ succes: true, username: user.username });
 
 });
 
 app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, city, birthdate } = req.body;
   const existingUser = await users.findOne({ username });
   if (existingUser) {
-    return res.status(400).json({ error: 'El usuario ya existe' });
+    return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
   }
-  const newUser = new users({ username, password });
+  const newUser = new users({ username, password, city, birthdate });
   await newUser.save();
-  res.status(201).json({ message: 'Usuario creado con éxito' });
+  res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
 }
 );
 
