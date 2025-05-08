@@ -1,23 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import RestaurantList from './RestaurantList';
+import Orders from './Orders';
 
-// Componentes de placeholder para las otras pestañas
-const OrdersList = () => (
-  <div>
-    <h2 style={{ 
-      fontSize: '1.5rem', 
-      marginBottom: '20px', 
-      color: '#333',
-      borderBottom: '2px solid #f0f0f0',
-      paddingBottom: '10px'
-    }}>
-      Mis Órdenes
-    </h2>
-    <p style={{ color: '#666' }}>Aquí se mostrarán tus órdenes recientes.</p>
-  </div>
-);
-
+// Componente para reviews (placeholder)
 const ReviewsList = () => (
   <div>
     <h2 style={{ 
@@ -122,7 +108,7 @@ export default function CustomerDashboard() {
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}>
           {activeTab === 'restaurants' && <RestaurantList />}
-          {activeTab === 'orders' && <OrdersList />}
+          {activeTab === 'orders' && <Orders />}
           {activeTab === 'reviews' && <ReviewsList />}
         </div>
       </div>

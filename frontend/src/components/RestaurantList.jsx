@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { query, distinctRestaurantCities } from '../api/crud';
+import { useCart } from '../context/CartContext';
 
 const RestaurantList = () => {
   // Estados para el componente
@@ -10,6 +11,18 @@ const RestaurantList = () => {
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState('');
   const [priceFilter, setPriceFilter] = useState('');
+  const [addedToCartMessages, setAddedToCartMessages] = useState({});
+
+  // Acceder al contexto del carrito
+  const { addToCart, getTotalItemsCount } = useCart();
+  
+  // Estado para el contador del carrito
+  const [cartCount, setCartCount] = useState(0);
+  
+  // Actualizar el contador del carrito
+  useEffect(() => {
+    setCartCount(getTotalItemsCount());
+  }, [getTotalItemsCount]);
 
   // Cargar restaurantes desde la API
   useEffect(() => {
@@ -87,6 +100,28 @@ const RestaurantList = () => {
   const toggleRestaurant = (index) => {
     setExpandedRestaurant(expandedRestaurant === index ? null : index);
   };
+  
+  // Manejar la adición de un item al carrito
+  const handleAddToCart = (restaurant, menuItem) => {
+    addToCart(restaurant, menuItem);
+    
+    // Mostrar mensaje de confirmación
+    setAddedToCartMessages(prev => ({
+      ...prev,
+      [`${restaurant._id}-${menuItem._id}`]: true
+    }));
+    
+    // Ocultar el mensaje después de 2 segundos
+    setTimeout(() => {
+      setAddedToCartMessages(prev => ({
+        ...prev,
+        [`${restaurant._id}-${menuItem._id}`]: false
+      }));
+    }, 2000);
+    
+    // Actualizar el contador del carrito
+    setCartCount(getTotalItemsCount());
+  };
 
   // Componente para indicador de carga
   if (loading) {
@@ -139,6 +174,53 @@ const RestaurantList = () => {
   // Renderizar el listado de restaurantes
   return (
     <div>
+      {/* Indicador del carrito */}
+      <div 
+        style={{ 
+          position: 'fixed', 
+          top: '20px', 
+          right: '20px',
+          backgroundColor: '#2196f3',
+          color: 'white',
+          borderRadius: '50%',
+          width: '60px',
+          height: '60px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+          cursor: 'pointer',
+          zIndex: 1000
+        }}
+        onClick={() => window.location.href = '/orders'}
+        title="Ver carrito"
+      >
+        <div style={{ position: 'relative' }}>
+          <span style={{ fontSize: '24px' }}>🛒</span>
+          {cartCount > 0 && (
+            <span 
+              style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                backgroundColor: '#ff5722',
+                color: 'white',
+                borderRadius: '50%',
+                width: '22px',
+                height: '22px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                fontSize: '12px',
+                fontWeight: 'bold',
+              }}
+            >
+              {cartCount}
+            </span>
+          )}
+        </div>
+      </div>
+    
       {/* Barra de filtros */}
       <div style={{ 
         display: 'flex', 
@@ -376,10 +458,16 @@ const RestaurantList = () => {
                           </div>
                           
                           <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(restaurant, item);
+                            }}
                             style={{
                               width: '100%',
                               padding: '10px 0',
-                              backgroundColor: '#4caf50',
+                              backgroundColor: addedToCartMessages[`${restaurant._id}-${item._id}`] 
+                                ? '#8bc34a' 
+                                : '#4caf50',
                               color: 'white',
                               border: 'none',
                               borderRadius: '4px',
@@ -393,8 +481,17 @@ const RestaurantList = () => {
                               marginTop: 'auto'
                             }}
                           >
-                            <span style={{ fontSize: '16px' }}>&#128722;</span>
-                            Añadir al carrito
+                            {addedToCartMessages[`${restaurant._id}-${item._id}`] ? (
+                              <>
+                                <span style={{ fontSize: '16px' }}>✓</span>
+                                Añadido
+                              </>
+                            ) : (
+                              <>
+                                <span style={{ fontSize: '16px' }}>🛒</span>
+                                Añadir al carrito
+                              </>
+                            )}
                           </button>
                         </div>
                       ))}
