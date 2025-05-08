@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 const ReviewSchema = new mongoose.Schema({
+    _id: String,
     rating: {
       type: Number,
       required: true,

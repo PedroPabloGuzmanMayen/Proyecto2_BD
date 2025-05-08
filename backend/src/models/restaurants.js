@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const MenuItemSchema = new mongoose.Schema({
+    _id: String,
     name: {
       type: String,
       required: true
@@ -16,6 +17,7 @@ const MenuItemSchema = new mongoose.Schema({
 });
   
   const RestaurantSchema = new mongoose.Schema({
+    _id: String,
     name: {
       type: String,
       required: true

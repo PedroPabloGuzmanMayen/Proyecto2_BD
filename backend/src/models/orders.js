@@ -12,6 +12,7 @@ const OrderDetailSchema = new mongoose.Schema({
   });
   
   const OrderSchema = new mongoose.Schema({
+    _id: String,
     detail: [OrderDetailSchema],
     total: {
       type: Number,

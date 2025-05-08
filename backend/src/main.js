@@ -315,7 +315,9 @@ app.post('/:col', async (req, res) => {
   const Model = models[req.params.col];
   if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const doc = new Model(req.body);
+  const bodyWithId = { _id: uuidv4(), ...req.body };  // <-- aquí se agrega el _id
+  const doc = new Model(bodyWithId);
+
   await doc.save();
   res.json(doc);
 });
