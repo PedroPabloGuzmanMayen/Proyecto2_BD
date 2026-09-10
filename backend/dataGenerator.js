@@ -3,10 +3,10 @@ import fs from 'fs';
 import { ObjectId } from 'mongodb';
 
 // Número de documentos a generar
-const NUM_USERS = 100;
-const NUM_RESTAURANTS = 50;
-const NUM_REVIEWS = 200;
-const NUM_ORDERS = 300;
+const NUM_USERS = 25000;
+const NUM_RESTAURANTS = 5;
+const NUM_REVIEWS = 600;
+const NUM_ORDERS = 25000;
 
 // Arrays para almacenar IDs generados (para referencias)
 const userIds = [];
@@ -158,4 +158,3 @@ console.log('- users.json');
 console.log('- restaurants.json');
 console.log('- reviews.json');
 console.log('- orders.json');
-console.log('\nUtiliza mongoimport para importar estos archivos a tu base de datos MongoDB.');

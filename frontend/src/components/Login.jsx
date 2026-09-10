@@ -9,8 +9,8 @@ export default function Login() {
   const [birthCity, setBirthCity] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState('login'); // 'login' o 'register'
-  
+  const [mode, setMode] = useState('login');
+
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
@@ -18,24 +18,18 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
       if (mode === 'login') {
         await login(username, password);
         navigate('/');
       } else {
-        // Para el registro, incluimos fecha y ciudad de nacimiento
-        await register(username, password, {
-          birthDate,
-          birthCity
-        });
+        await register(username, password, { birthDate, birthCity });
         setMode('login');
         setError('');
-        // Mostrar mensaje de éxito
-        alert('Usuario registrado con éxito. Ahora puedes iniciar sesión.');
-        // Limpiar campos para el login
         setBirthDate('');
         setBirthCity('');
+        alert('Usuario registrado con exito. Ahora puedes iniciar sesion.');
       }
     } catch (err) {
       setError(err.message);
@@ -44,170 +38,170 @@ export default function Login() {
     }
   };
 
+  const resetForm = () => {
+    setUsername('');
+    setPassword('');
+    setBirthDate('');
+    setBirthCity('');
+    setError('');
+  };
+
   return (
-    <div style={{ 
-      maxWidth: '400px', 
-      margin: '50px auto', 
-      padding: '20px',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-      borderRadius: '8px'
+    <div style={{
+      minHeight: '70vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     }}>
-      <h2>{mode === 'login' ? 'Iniciar Sesión' : 'Registro'}</h2>
-      
-      {error && (
-        <div style={{ 
-          padding: '10px', 
-          backgroundColor: '#ffebee',
-          color: '#c62828',
-          borderRadius: '4px',
-          marginBottom: '15px'
-        }}>
-          {error}
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="username" style={{ display: 'block', marginBottom: '5px' }}>
-            Nombre de usuario
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
-              borderRadius: '4px',
-              border: '1px solid #ccc'
-            }}
-          />
-        </div>
-        
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
-            Contraseña
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
-              borderRadius: '4px',
-              border: '1px solid #ccc'
-            }}
-          />
-        </div>
-        
-        {/* Campos adicionales solo para el registro */}
-        {mode === 'register' && (
-          <>
-            <div style={{ marginBottom: '15px' }}>
-              <label htmlFor="birthDate" style={{ display: 'block', marginBottom: '5px' }}>
-                Fecha de nacimiento
-              </label>
-              <input
-                id="birthDate"
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                required
-                style={{ 
-                  width: '100%', 
-                  padding: '8px', 
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: '15px' }}>
-              <label htmlFor="birthCity" style={{ display: 'block', marginBottom: '5px' }}>
-                Ciudad de nacimiento
-              </label>
-              <input
-                id="birthCity"
-                type="text"
-                value={birthCity}
-                onChange={(e) => setBirthCity(e.target.value)}
-                required
-                style={{ 
-                  width: '100%', 
-                  padding: '8px', 
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
-              />
-            </div>
-          </>
-        )}
-        
-        <button 
-          type="submit" 
-          disabled={isLoading}
-          style={{
-            padding: '10px',
-            backgroundColor: '#1976d2',
+      <div style={{
+        width: '100%',
+        maxWidth: '420px',
+        animation: 'fadeIn 0.3s ease',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-3xl)' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--color-primary)',
             color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            opacity: isLoading ? 0.7 : 1
-          }}
-        >
-          {isLoading 
-            ? 'Procesando...' 
-            : mode === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
-        </button>
-        
-        <div style={{ marginTop: '15px', textAlign: 'center' }}>
-          {mode === 'login' ? (
-            <p>
-              ¿No tienes una cuenta?{' '}
-              <button
-                type="button"
-                onClick={() => setMode('register')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1976d2',
-                  cursor: 'pointer',
-                  padding: 0,
-                  font: 'inherit',
-                  textDecoration: 'underline'
-                }}
-              >
-                Regístrate aquí
-              </button>
-            </p>
-          ) : (
-            <p>
-              ¿Ya tienes una cuenta?{' '}
-              <button
-                type="button"
-                onClick={() => setMode('login')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1976d2',
-                  cursor: 'pointer',
-                  padding: 0,
-                  font: 'inherit',
-                  textDecoration: 'underline'
-                }}
-              >
-                Inicia sesión
-              </button>
-            </p>
-          )}
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            marginBottom: 'var(--space-lg)',
+          }}>
+            🍽
+          </div>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: 'var(--space-xs)' }}>
+            {mode === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
+            {mode === 'login'
+              ? 'Inicia sesion para ordenar tu comida favorita'
+              : 'Registrate para empezar a ordenar'}
+          </p>
         </div>
-      </form>
+
+        <div className="card" style={{ padding: 'var(--space-2xl)' }}>
+          {error && (
+            <div className="alert alert-error">{error}</div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="username">Usuario</label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Tu nombre de usuario"
+                required
+                autoComplete="username"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Contrasena</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Tu contrasena"
+                required
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              />
+            </div>
+
+            {mode === 'register' && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="birthDate">Fecha de nacimiento</label>
+                  <input
+                    id="birthDate"
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="birthCity">Ciudad de nacimiento</label>
+                  <input
+                    id="birthCity"
+                    type="text"
+                    value={birthCity}
+                    onChange={(e) => setBirthCity(e.target.value)}
+                    placeholder="Ej: Guatemala"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn btn-primary btn-lg"
+              style={{ width: '100%', marginTop: 'var(--space-sm)' }}
+            >
+              {isLoading
+                ? 'Procesando...'
+                : mode === 'login' ? 'Iniciar Sesion' : 'Registrarse'}
+            </button>
+          </form>
+
+          <div style={{
+            marginTop: 'var(--space-xl)',
+            textAlign: 'center',
+            fontSize: '0.875rem',
+            color: 'var(--text-secondary)',
+          }}>
+            {mode === 'login' ? (
+              <>
+                No tienes cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setMode('register'); resetForm(); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-primary)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontWeight: 600,
+                    font: 'inherit',
+                  }}
+                >
+                  Registrate
+                </button>
+              </>
+            ) : (
+              <>
+                Ya tienes cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setMode('login'); resetForm(); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-primary)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontWeight: 600,
+                    font: 'inherit',
+                  }}
+                >
+                  Inicia sesion
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

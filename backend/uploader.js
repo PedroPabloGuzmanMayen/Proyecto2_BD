@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // URL de tu servidor backend
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:5555';
 
 // Función para encontrar todos los archivos JSON (excepto package*.json)
 function findJsonFiles() {

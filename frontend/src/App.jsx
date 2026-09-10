@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import CrudManager from './components/CrudManager.jsx';
 import StatsManager from './components/StatsManager.jsx';
@@ -9,52 +9,63 @@ import './App.css';
 
 function Navigation() {
   const { isAuthenticated, isAdmin, logout, user } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) return null;
+
+  const initial = user?.username?.[0] || '?';
 
   return (
-    <nav style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between',
-      padding: '10px',
-      borderBottom: '1px solid #e0e0e0',
-      marginBottom: '20px'
-    }}>
-      <div>
-        {isAuthenticated && isAdmin ? (
-          // Navegación para administradores
+    <nav className="nav">
+      <div className="nav-links">
+        {isAdmin ? (
           <>
-            <Link to="/" style={{ marginRight: '15px' }}>CRUD</Link>
-            <Link to="/stats">Estadísticas</Link>
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            >
+              CRUD
+            </Link>
+            <Link
+              to="/stats"
+              className={`nav-link ${location.pathname === '/stats' ? 'active' : ''}`}
+            >
+              Estadisticas
+            </Link>
           </>
-        ) : isAuthenticated ? (
-          // Navegación para usuarios normales
+        ) : (
           <>
-            <Link to="/" style={{ marginRight: '15px' }}>Restaurantes</Link>
-            <Link to="/orders" style={{ marginRight: '15px' }}>Mis Órdenes</Link>
-            <Link to="/reviews">Mis Reviews</Link>
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            >
+              Restaurantes
+            </Link>
+            <Link
+              to="/orders"
+              className={`nav-link ${location.pathname === '/orders' ? 'active' : ''}`}
+            >
+              Mis Ordenes
+            </Link>
+            <Link
+              to="/reviews"
+              className={`nav-link ${location.pathname === '/reviews' ? 'active' : ''}`}
+            >
+              Mis Reviews
+            </Link>
           </>
-        ) : null}
+        )}
       </div>
-      
-      {isAuthenticated && (
-        <div>
-          <span style={{ marginRight: '10px' }}>
-            {user?.username}
-          </span>
-          <button 
-            onClick={logout}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Cerrar Sesión
-          </button>
+
+      <div className="nav-right">
+        <div className="nav-user">
+          <div className="nav-avatar">{initial}</div>
+          <span>{user?.username}</span>
         </div>
-      )}
+        <button onClick={logout} className="nav-logout">
+          Salir
+        </button>
+      </div>
     </nav>
   );
 }
@@ -64,43 +75,42 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Navigation />
-      <Routes>
-        {/* Ruta de login accesible para todos */}
-        <Route path="/login" element={
-          isAuthenticated ? <Navigate to="/" /> : <Login />
-        } />
+      <div className="app-layout">
+        <Navigation />
+        <main className="main-content">
+          <Routes>
+            <Route path="/login" element={
+              isAuthenticated ? <Navigate to="/" /> : <Login />
+            } />
 
-        {/* Rutas para administradores */}
-        <Route path="/" element={
-          <ProtectedRoute requireAdmin={isAdmin}>
-            {isAdmin ? <CrudManager /> : <CustomerDashboard />}
-          </ProtectedRoute>
-        } />
+            <Route path="/" element={
+              <ProtectedRoute requireAdmin={isAdmin}>
+                {isAdmin ? <CrudManager /> : <CustomerDashboard />}
+              </ProtectedRoute>
+            } />
 
-        <Route path="/stats" element={
-          <ProtectedRoute requireAdmin={true}>
-            <StatsManager />
-          </ProtectedRoute>
-        } />
+            <Route path="/stats" element={
+              <ProtectedRoute requireAdmin={true}>
+                <StatsManager />
+              </ProtectedRoute>
+            } />
 
-        {/* Rutas para usuarios normales */}
-        <Route path="/orders" element={
-          <ProtectedRoute>
-            <CustomerDashboard />
-          </ProtectedRoute>
-        } />
+            <Route path="/orders" element={
+              <ProtectedRoute>
+                <CustomerDashboard initialTab="orders" />
+              </ProtectedRoute>
+            } />
 
-        <Route path="/reviews" element={
-          <ProtectedRoute>
-            <CustomerDashboard />
-          </ProtectedRoute>
-        } />
+            <Route path="/reviews" element={
+              <ProtectedRoute>
+                <CustomerDashboard initialTab="reviews" />
+              </ProtectedRoute>
+            } />
 
-        {/* Redirección por defecto */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }
-

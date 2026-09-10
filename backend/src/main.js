@@ -102,7 +102,7 @@ const getUserOrders = async (userId) => {
 };
 
 // Conexión a MongoDB
-const uri = 'mongodb+srv://gaga:hola123@cluster0.phogu.mongodb.net/proyecto2?retryWrites=true&w=majority&appName=Cluster0';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/proyecto2';
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Conectado a MongoDB');
@@ -541,6 +541,6 @@ app.delete('/:col', async (req, res) => {
 });
 
 // Arranque del servidor
-const PORT = 3000;
+const PORT = 5555;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
 

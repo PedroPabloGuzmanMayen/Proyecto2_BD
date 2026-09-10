@@ -1,321 +1,322 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { query, createOne, updateOne, deleteOne } from '../api/crud';
 
 const ReviewsList = () => {
   const { userId } = useAuth();
-  const [restaurantList, setRestaurantList] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [activeView, setActiveView] = useState('list');
 
-  // Estados para el formulario
   const [formData, setFormData] = useState({
     rating: 5,
     comment: '',
     restaurant_id: ''
   });
+  const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  
-  // Cargar la lista de restaurantes disponibles
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        setLoading(true);
-        
-        // Obtener todos los restaurantes para el selector
-        const restaurantsData = await query('restaurants', {});
-        if (Array.isArray(restaurantsData)) {
-          setRestaurantList(restaurantsData);
-        } else {
-          setRestaurantList([]);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error al cargar restaurantes:', err);
-        setError('No se pudieron cargar los restaurantes. Por favor, intenta de nuevo más tarde.');
-        setLoading(false);
-      }
-    };
-    
-    fetchRestaurants();
-  }, []);
+  const [deletingId, setDeletingId] = useState(null);
 
-  // Manejar cambios en el formulario
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === 'rating' ? parseInt(value, 10) : value
-    });
+  const fetchData = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [restaurantsData, reviewsData] = await Promise.all([
+        query('restaurants', {}),
+        query('reviews', { filter: { user_id: String(userId) } })
+      ]);
+
+      if (Array.isArray(restaurantsData)) setRestaurants(restaurantsData);
+      if (Array.isArray(reviewsData)) {
+        setReviews(reviewsData.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt) : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt) : 0;
+          return dateB - dateA;
+        }));
+      }
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+      setError('No se pudieron cargar los datos. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const getRestaurantName = (restaurantId) => {
+    const restaurant = restaurants.find(r => String(r._id) === String(restaurantId));
+    return restaurant ? `${restaurant.name} - ${restaurant.city}` : `Restaurante (ID: ${String(restaurantId).slice(-6).toUpperCase()})`;
   };
 
-  // Crear una nueva review
-  const handleSubmitReview = async (e) => {
+  const showSuccess = (msg) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'rating' ? parseInt(value, 10) : value
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({ rating: 5, comment: '', restaurant_id: '' });
+    setEditingId(null);
+    setActiveView('list');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!userId || !formData.restaurant_id || !formData.comment || !formData.rating) {
+    if (!formData.restaurant_id || !formData.comment || !formData.rating) {
       setError('Por favor completa todos los campos.');
       return;
     }
-    
+
     try {
       setSubmitting(true);
       setError(null);
-      
-      const reviewData = {
-        ...formData,
-        user_id: userId
-      };
-      
-      // Crear nueva review
-      await createOne('reviews', reviewData);
-      
-      // Mostrar mensaje de éxito
-      setSuccess('¡Review creada con éxito!');
-      
-      // Limpiar el formulario
-      setFormData({
-        rating: 5,
-        comment: '',
-        restaurant_id: ''
-      });
-      
-      // Ocultar mensaje de éxito después de 3 segundos
-      setTimeout(() => {
-        setSuccess(null);
-      }, 3000);
-      
+
+      if (editingId) {
+        await updateOne('reviews', editingId, {
+          rating: formData.rating,
+          comment: formData.comment
+        });
+        showSuccess('Review actualizada con exito.');
+      } else {
+        await createOne('reviews', {
+          ...formData,
+          user_id: userId
+        });
+        showSuccess('Review creada con exito.');
+      }
+
+      resetForm();
+      await fetchData();
     } catch (err) {
       console.error('Error al guardar review:', err);
-      setError('Error al guardar la review. Por favor, intenta de nuevo.');
+      setError('Error al guardar la review. Intenta de nuevo.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Si está cargando, mostrar indicador
+  const handleEdit = (review) => {
+    setFormData({
+      rating: review.rating,
+      comment: review.comment,
+      restaurant_id: review.restaurant_id
+    });
+    setEditingId(review._id);
+    setActiveView('form');
+  };
+
+  const handleDelete = async (reviewId) => {
+    if (!window.confirm('Estas seguro de que quieres eliminar esta review?')) return;
+    try {
+      setDeletingId(reviewId);
+      setError(null);
+      await deleteOne('reviews', reviewId);
+      showSuccess('Review eliminada.');
+      await fetchData();
+    } catch (err) {
+      console.error('Error al eliminar review:', err);
+      setError('Error al eliminar la review.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const renderStars = (rating, interactive = false) => {
+    return (
+      <div style={{ display: 'flex', gap: '2px' }}>
+        {[1, 2, 3, 4, 5].map(star => (
+          <label
+            key={star}
+            style={{
+              cursor: interactive ? 'pointer' : 'default',
+              fontSize: '1.125rem',
+              color: star <= rating ? 'var(--color-warning)' : 'var(--border-color)',
+              padding: 0,
+              lineHeight: 1,
+            }}
+          >
+            {interactive && (
+              <input
+                type="radio"
+                name="rating"
+                value={star}
+                checked={formData.rating === star}
+                onChange={handleInputChange}
+                style={{ display: 'none' }}
+              />
+            )}
+            ★
+          </label>
+        ))}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '30px' }}>
-        <div style={{
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #3498db',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto 20px'
-        }}></div>
-        <style>
-          {`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}
-        </style>
-        <p>Cargando restaurantes...</p>
+      <div className="loading-container">
+        <div className="spinner" />
+        <p style={{ color: 'var(--text-muted)' }}>Cargando reviews...</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h2 style={{ 
-        fontSize: '1.5rem', 
-        marginBottom: '20px', 
-        color: '#333',
-        borderBottom: '2px solid #f0f0f0',
-        paddingBottom: '10px'
-      }}>
-        Crear una Nueva Review
-      </h2>
-      
-      {/* Mostrar mensajes de error o éxito */}
-      {error && (
-        <div style={{ 
-          padding: '15px', 
-          backgroundColor: '#ffebee', 
-          color: '#c62828', 
-          borderRadius: '4px',
-          marginBottom: '20px'
-        }}>
-          {error}
+      {error && <div className="alert alert-error">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xl)' }}>
+        <h2 style={{ fontSize: '1.25rem' }}>
+          {activeView === 'form' ? (editingId ? 'Editar Review' : 'Nueva Review') : 'Mis Reviews'}
+        </h2>
+        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+          {activeView === 'form' && (
+            <button onClick={resetForm} className="btn btn-outline btn-sm">
+              ← Volver
+            </button>
+          )}
+          {activeView === 'list' && (
+            <button onClick={() => { resetForm(); setActiveView('form'); }} className="btn btn-primary btn-sm">
+              + Nueva Review
+            </button>
+          )}
         </div>
-      )}
-      
-      {success && (
-        <div style={{ 
-          padding: '15px', 
-          backgroundColor: '#e8f5e9', 
-          color: '#2e7d32', 
-          borderRadius: '4px',
-          marginBottom: '20px'
-        }}>
-          {success}
-        </div>
-      )}
-      
-      {/* Formulario para crear reviews */}
-      <div style={{
-        border: '1px solid #e0e0e0',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '30px',
-        backgroundColor: '#f9f9f9'
-      }}>
-        <form onSubmit={handleSubmitReview}>
-          {/* Selector de restaurante */}
-          <div style={{ marginBottom: '20px' }}>
-            <label 
-              htmlFor="restaurant_id" 
-              style={{ 
-                display: 'block', 
-                marginBottom: '8px',
-                fontWeight: 'bold',
-                color: '#333'
-              }}
-            >
-              Restaurante:
-            </label>
-            
-            <select
-              id="restaurant_id"
-              name="restaurant_id"
-              value={formData.restaurant_id}
-              onChange={handleInputChange}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
-              }}
-            >
-              <option value="">Selecciona un restaurante</option>
-              {restaurantList.map(restaurant => (
-                <option key={restaurant._id} value={restaurant._id}>
-                  {restaurant.name} - {restaurant.city}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Selector de calificación */}
-          <div style={{ marginBottom: '20px' }}>
-            <label 
-              style={{ 
-                display: 'block', 
-                marginBottom: '8px',
-                fontWeight: 'bold',
-                color: '#333'
-              }}
-            >
-              Calificación:
-            </label>
-            
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {[1, 2, 3, 4, 5].map(star => (
-                <label 
-                  key={star}
-                  style={{
-                    cursor: 'pointer',
-                    fontSize: '32px',
-                    color: star <= formData.rating ? '#FFD700' : '#e0e0e0'
-                  }}
+      </div>
+
+      {activeView === 'form' && (
+        <div className="card" style={{ marginBottom: 'var(--space-2xl)' }}>
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="restaurant_id">Restaurante:</label>
+                <select
+                  id="restaurant_id"
+                  name="restaurant_id"
+                  value={formData.restaurant_id}
+                  onChange={handleInputChange}
+                  required
+                  disabled={editingId}
                 >
-                  <input
-                    type="radio"
-                    name="rating"
-                    value={star}
-                    checked={formData.rating === star}
-                    onChange={handleInputChange}
-                    style={{ display: 'none' }}
-                  />
-                  ★
-                </label>
+                  <option value="">Selecciona un restaurante</option>
+                  {restaurants.map(r => (
+                    <option key={r._id} value={r._id}>{r.name} - {r.city}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Calificacion:</label>
+                <div style={{ padding: '4px 0' }}>
+                  {renderStars(formData.rating, true)}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="comment">Tu opinion:</label>
+                <textarea
+                  id="comment"
+                  name="comment"
+                  value={formData.comment}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Comparte tu experiencia con este restaurante..."
+                  style={{ minHeight: '100px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                <button type="submit" disabled={submitting} className="btn btn-primary">
+                  {submitting ? 'Guardando...' : editingId ? 'Actualizar Review' : 'Publicar Review'}
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForm} className="btn btn-outline">
+                    Cancelar
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeView === 'list' && (
+        <>
+          {reviews.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">⭐</div>
+              <h3>Sin reviews</h3>
+              <p>Aun no has publicado ninguna review. Comparte tu experiencia!</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+              {reviews.map(review => (
+                <div key={review._id} className="card">
+                  <div className="card-header">
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: '1rem', marginBottom: 'var(--space-xs)' }}>
+                        {getRestaurantName(review.restaurant_id)}
+                      </h3>
+                      {renderStars(review.rating)}
+                    </div>
+                    <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                      <button
+                        onClick={() => handleEdit(review)}
+                        className="btn btn-ghost btn-sm"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(review._id)}
+                        disabled={deletingId === review._id}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'var(--color-danger)' }}
+                      >
+                        {deletingId === review._id ? '...' : 'Eliminar'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="card-body">
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                      {review.comment}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
+          )}
+
+          <div style={{
+            backgroundColor: 'var(--color-primary-light)',
+            borderRadius: 'var(--radius-lg)',
+            padding: 'var(--space-xl)',
+            marginTop: 'var(--space-2xl)',
+          }}>
+            <h3 style={{ color: 'var(--color-primary)', marginBottom: 'var(--space-sm)' }}>
+              Como funcionan las reviews?
+            </h3>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+              Tus opiniones ayudan a otros usuarios a elegir donde comer.
+              Puedes crear, editar y eliminar tus reviews en cualquier momento.
+            </p>
           </div>
-          
-          {/* Campo para el comentario */}
-          <div style={{ marginBottom: '25px' }}>
-            <label 
-              htmlFor="comment" 
-              style={{ 
-                display: 'block', 
-                marginBottom: '8px',
-                fontWeight: 'bold',
-                color: '#333'
-              }}
-            >
-              Tu opinión:
-            </label>
-            
-            <textarea
-              id="comment"
-              name="comment"
-              value={formData.comment}
-              onChange={handleInputChange}
-              required
-              placeholder="¿Qué te pareció este restaurante? Comparte tu experiencia..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '4px',
-                border: '1px solid #ddd',
-                minHeight: '120px',
-                resize: 'vertical',
-                fontSize: '16px',
-                lineHeight: '1.5'
-              }}
-            />
-          </div>
-          
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              padding: '12px 25px',
-              backgroundColor: '#4caf50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              opacity: submitting ? 0.7 : 1,
-              transition: 'background-color 0.2s ease'
-            }}
-          >
-            {submitting ? 'Enviando...' : 'Publicar Review'}
-          </button>
-        </form>
-      </div>
-      
-      <div style={{
-        backgroundColor: '#e3f2fd',
-        borderRadius: '8px',
-        padding: '20px',
-        marginTop: '30px'
-      }}>
-        <h3 style={{ color: '#1976d2', marginTop: 0 }}>¿Cómo funcionan las reviews?</h3>
-        <p>
-          Tus opiniones son muy importantes para ayudar a otros usuarios a elegir 
-          dónde comer. Una buena review incluye:
-        </p>
-        <ul style={{ paddingLeft: '20px' }}>
-          <li>Detalles sobre la calidad de la comida</li>
-          <li>Comentarios sobre el servicio</li>
-          <li>Tu experiencia general con el restaurante</li>
-        </ul>
-        <p>
-          ¡Gracias por compartir tus experiencias con la comunidad!
-        </p>
-      </div>
+        </>
+      )}
     </div>
   );
 };

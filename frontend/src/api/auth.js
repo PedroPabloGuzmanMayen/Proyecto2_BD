@@ -1,7 +1,7 @@
 // Definir la URL del backend directamente
 import { normalizeUserData, extractSessionData } from './userUtils';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:5555';
 
 export const login = async (username, password) => {
   try {
