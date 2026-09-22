@@ -66,6 +66,16 @@ app.use(cors({
 
 app.use(express.json());
 
+// Headers de seguridad — CWE-598 fix
+// Referrer-Policy: evita que las URLs (con IDs, tokens, etc.) se filtren en el header Referer
+// Cache-Control: evita que respuestas sensibles se almacenen en caché del navegador o proxies
+app.use((req, res, next) => {
+  res.set('Referrer-Policy', 'no-referrer');
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  next();
+});
+
 const getUserOrders = async (userId) => {
   try {
     const orders = await mongoose.model('orders').aggregate([
@@ -111,6 +121,21 @@ function safeParse(str, fallback) {
   } catch {
     return fallback;
   }
+}
+
+// Un ValidationError/CastError de Mongoose significa que el cliente mandó datos
+// inválidos: eso es un 400, no un 500. Evita reportar como "error de servidor"
+// algo que en realidad es input mal formado (ZAP: Application Error Disclosure).
+function isClientInputError(error) {
+  return error?.name === 'ValidationError' || error?.name === 'CastError';
+}
+
+function sendServerError(res, error, context) {
+  console.error(`Error en ${context}:`, error);
+  if (isClientInputError(error)) {
+    return res.status(400).json({ error: 'Datos de entrada inválidos' });
+  }
+  return res.status(500).json({ error: 'Error interno del servidor' });
 }
 
 // *** RUTAS DE GRIDFS ***
@@ -170,8 +195,11 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 // Descargar un archivo por ID
 app.get('/files/:fileId', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) {
+      return res.status(400).json({ success: false, message: 'ID de archivo inválido' });
+    }
     const fileId = new mongoose.Types.ObjectId(req.params.fileId);
-    
+
     // Verificar si el archivo existe
     const files = await bucket.find({ _id: fileId }).toArray();
     
@@ -226,8 +254,11 @@ app.get('/files', async (req, res) => {
 // Eliminar un archivo
 app.delete('/files/:fileId', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) {
+      return res.status(400).json({ success: false, message: 'ID de archivo inválido' });
+    }
     const fileId = new mongoose.Types.ObjectId(req.params.fileId);
-    
+
     // Verificar si el archivo existe
     const files = await bucket.find({ _id: fileId }).toArray();
     
@@ -250,131 +281,159 @@ app.delete('/files/:fileId', async (req, res) => {
 // simples
 // Contar todas las ordenes
 app.get('/stats/orders/count', async (req, res) => {
-  const total = await orders.countDocuments();
-  res.json({ totalOrders: total });
+  try {
+    const total = await orders.countDocuments();
+    res.json({ totalOrders: total });
+  } catch (error) {
+    return sendServerError(res, error, '/stats/orders/count');
+  }
 });
 
 //login
 app.post('/login', async (req, res) => {
-  const user = await users.findOne({ username: req.body.username });
-  if (!user) {
-    return res.status(404).json({ succes: false, error: 'Usuario no encontrado' });
+  try {
+    const user = await users.findOne({ username: req.body.username });
+    if (!user) {
+      return res.status(404).json({ succes: false, error: 'Usuario no encontrado' });
+    }
+    if (user.password !== req.body.password) {
+      return res.status(401).json({ succes: false, error: 'Contraseña incorrecta' });
+    }
+    res.json({ succes: true, username: user.username, userID: user._id});
+  } catch (error) {
+    return sendServerError(res, error, '/login');
   }
-  if (user.password !== req.body.password) {
-    return res.status(401).json({ succes: false, error: 'Contraseña incorrecta' });
-  }
-  res.json({ succes: true, username: user.username, userID: user._id});
-
 });
 
 app.post('/register', async (req, res) => {
-  const { username, password, city, birthdate } = req.body;
-  const existingUser = await users.findOne({ username });
-  const id = uuidv4();
-  if (existingUser) {
-    return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
+  try {
+    const { username, password, city, birthdate } = req.body;
+    const existingUser = await users.findOne({ username });
+    const id = uuidv4();
+    if (existingUser) {
+      return res.status(400).json({ succes: false, error: 'El usuario ya existe' });
+    }
+    const newUser = new users({ _id: id, username, password, city, birthdate });
+    await newUser.save();
+    res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
+  } catch (error) {
+    return sendServerError(res, error, '/register');
   }
-  const newUser = new users({ _id: id, username, password, city, birthdate });
-  await newUser.save();
-  res.status(201).json({ succes: true, message: 'Usuario creado con éxito' });
-}
-);
+});
 
 // lista de ciudades únicas donde hay restaurantes
 app.get('/stats/restaurants/cities', async (req, res) => {
-  const cities = await restaurants.distinct('city');
-  res.json({ cities });
+  try {
+    const cities = await restaurants.distinct('city');
+    res.json({ cities });
+  } catch (error) {
+    return sendServerError(res, error, '/stats/restaurants/cities');
+  }
 });
 
 app.post('/userOrder', async (req, res) => {
-  const { userId, orderId } = req.body;
-  const user = await users.findById(userId);
-  if (!user) {
-    return res.status(404).json({ error: 'Usuario no encontrado' });
+  try {
+    const { userId, orderId } = req.body;
+    const user = await users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    user.orders.push(orderId);
+    await user.save();
+    res.json({ message: 'Orden agregada al usuario' });
+  } catch (error) {
+    return sendServerError(res, error, '/userOrder');
   }
-  user.orders.push(orderId);
-  await user.save();
-  res.json({ message: 'Orden agregada al usuario' });
-}
-);
+});
 
 app.get('/userOrders/:userId', async (req, res) => {
-  const userId = req.params.userId;
-  const user = await users.findOne({ _id: userId });
+  try {
+    const userId = req.params.userId;
+    const user = await users.findOne({ _id: userId });
 
-  if (!user) {
-    return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    const orders = await getUserOrders(userId);
+    res.json(orders);
+  } catch (error) {
+    return sendServerError(res, error, '/userOrders');
   }
-  const orders = await getUserOrders(userId);
-  res.json(orders);
-}
-);
+});
 
 // Top 5 restaurantes por calificación promedio
 app.get('/stats/restaurants/top-rated', async (req, res) => {
-  const pipeline = [
-    { $group: {
-        _id: '$restaurant_id',
-        avgRating: { $avg: '$rating' },
-        count:     { $sum: 1 }
+  try {
+    const pipeline = [
+      { $group: {
+          _id: '$restaurant_id',
+          avgRating: { $avg: '$rating' },
+          count:     { $sum: 1 }
+        }
+      },
+      { $sort: { avgRating: -1, count: -1 } },
+      { $limit: 5 },
+      { $lookup: {
+          from: 'restaurants',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'info'
+        }
+      },
+      { $unwind: '$info' },
+      { $project: {
+          _id: 0,
+          restaurant: '$info.name',
+          avgRating: 1,
+          reviews: '$count'
+        }
       }
-    },
-    { $sort: { avgRating: -1, count: -1 } },
-    { $limit: 5 },
-    { $lookup: {
-        from: 'restaurants',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'info'
-      }
-    },
-    { $unwind: '$info' },
-    { $project: {
-        _id: 0,
-        restaurant: '$info.name',
-        avgRating: 1,
-        reviews: '$count'
-      }
-    }
-  ];
-  const top = await reviews.aggregate(pipeline);
-  res.json(top);
+    ];
+    const top = await reviews.aggregate(pipeline);
+    res.json(top);
+  } catch (error) {
+    return sendServerError(res, error, '/stats/restaurants/top-rated');
+  }
 });
 
 // Platos más vendidos 
 app.get('/stats/orders/top-dishes', async (req,res) => {
-  const pipeline = [
-    { $unwind: '$detail' },
-    { $group: {
-        _id: '$detail.product_id',
-        totalSold: { $sum: '$detail.quantity' }
+  try {
+    const pipeline = [
+      { $unwind: '$detail' },
+      { $group: {
+          _id: '$detail.product_id',
+          totalSold: { $sum: '$detail.quantity' }
+        }
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+      // Buscar el nombre del platillo dentro de su restaurante
+      { $lookup: {
+          from: 'restaurants',
+          let: { pid: '$_id' },
+          pipeline: [
+            { $unwind: '$menu' },
+            { $match: { $expr: { $eq: ['$menu._id', '$$pid'] } } },
+            { $project: { _id: 0, name: '$menu.name' } }
+          ],
+          as: 'itemInfo'
+        }
+      },
+      { $unwind: '$itemInfo' },
+      { $project: {
+          _id: 0,
+          product_id: '$_id',
+          name: '$itemInfo.name',
+          totalSold: 1
+        }
       }
-    },
-    { $sort: { totalSold: -1 } },
-    { $limit: 5 },
-    // Buscar el nombre del platillo dentro de su restaurante
-    { $lookup: {
-        from: 'restaurants',
-        let: { pid: '$_id' },
-        pipeline: [
-          { $unwind: '$menu' },
-          { $match: { $expr: { $eq: ['$menu._id', '$$pid'] } } },
-          { $project: { _id: 0, name: '$menu.name' } }
-        ],
-        as: 'itemInfo'
-      }
-    },
-    { $unwind: '$itemInfo' },
-    { $project: {
-        _id: 0,
-        product_id: '$_id',
-        name: '$itemInfo.name',
-        totalSold: 1
-      }
-    }
-  ];
-  const top = await orders.aggregate(pipeline);
-  res.json(top);
+    ];
+    const top = await orders.aggregate(pipeline);
+    res.json(top);
+  } catch (error) {
+    return sendServerError(res, error, '/stats/orders/top-dishes');
+  }
 });
 
 
@@ -382,148 +441,250 @@ app.get('/stats/orders/top-dishes', async (req,res) => {
 
 // agregar un nuevo platillo al menú
 app.post('/restaurants/:id/menu/add', async (req, res) => {
-  const { name, price, description } = req.body;
-  const updated = await restaurants.findByIdAndUpdate(
-    req.params.id,
-    { $push: { menu: { name, price, description } } },
-    { new: true }
-  );
-  res.json(updated);
+  try {
+    const { name, price, description } = req.body;
+    if (typeof name !== 'string' || !name.trim() ||
+        typeof description !== 'string' || !description.trim() ||
+        typeof price !== 'number' || !Number.isFinite(price)) {
+      return res.status(400).json({ error: 'Datos de platillo inválidos' });
+    }
+    const updated = await restaurants.findByIdAndUpdate(
+      req.params.id,
+      { $push: { menu: { name, price, description } } },
+      { new: true, runValidators: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    return sendServerError(res, error, '/restaurants/:id/menu/add');
+  }
 });
 
 // eliminar un platillo por su _id
 app.delete('/restaurants/:id/menu/remove/:itemId', async (req, res) => {
-  const updated = await restaurants.findByIdAndUpdate(
-    req.params.id,
-    { $pull: { menu: { _id: req.params.itemId } } },
-    { new: true }
-  );
-  res.json(updated);
+  try {
+    const updated = await restaurants.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { menu: { _id: req.params.itemId } } },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    return sendServerError(res, error, '/restaurants/:id/menu/remove');
+  }
 });
 
 // añadir un tag 
 app.patch('/restaurants/:id/tags', async (req, res) => {
-  const { tag } = req.body;
-  const updated = await restaurants.findByIdAndUpdate(
-    req.params.id,
-    { $addToSet: { tags: tag } },
-    { new: true }
-  );
-  res.json(updated);
+  try {
+    const { tag } = req.body;
+    const updated = await restaurants.findByIdAndUpdate(
+      req.params.id,
+      { $addToSet: { tags: tag } },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    return sendServerError(res, error, '/restaurants/:id/tags');
+  }
 });
 
 // Embebidos
 // filtrar menú embebido en pipeline
 app.get('/reports/restaurants/:id/expensive-dishes', async (req, res) => {
-  const priceThreshold = Number(req.query.minPrice) || 20;
-  const pipeline = [
-    { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
-    { $unwind: '$menu' },
-    { $match: { 'menu.price': { $gte: priceThreshold } } },
-    { $project: {
-        _id: 0,
-        dish: '$menu.name',
-        price: '$menu.price'
-      }
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'ID de restaurante inválido' });
     }
-  ];
-  const dishes = await restaurants.aggregate(pipeline);
-  res.json(dishes);
+    const priceThreshold = Number(req.query.minPrice) || 20;
+    const pipeline = [
+      { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+      { $unwind: '$menu' },
+      { $match: { 'menu.price': { $gte: priceThreshold } } },
+      { $project: {
+          _id: 0,
+          dish: '$menu.name',
+          price: '$menu.price'
+        }
+      }
+    ];
+    const dishes = await restaurants.aggregate(pipeline);
+    res.json(dishes);
+  } catch (error) {
+    return sendServerError(res, error, '/reports/restaurants/:id/expensive-dishes');
+  }
 });
 
 // actualizar un campo dentro de un documento embebido 
 app.patch('/restaurants/:id/menu/:itemId/price', async (req, res) => {
-  const { newPrice } = req.body;
-  const updated = await restaurants.findOneAndUpdate(
-    { _id: req.params.id, 'menu._id': req.params.itemId },
-    { $set: { 'menu.$.price': newPrice } },
-    { new: true }
-  );
-  res.json(updated);
+  try {
+    const { newPrice } = req.body;
+    const updated = await restaurants.findOneAndUpdate(
+      { _id: req.params.id, 'menu._id': req.params.itemId },
+      { $set: { 'menu.$.price': newPrice } },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    return sendServerError(res, error, '/restaurants/:id/menu/:itemId/price');
+  }
 });
 
 
 // Rutas CRUD 
-// Consulta con filtros, proyección, sort, skip, limit
-app.get('/:col', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+// Consulta segura con filtros en el body (POST) — CWE-598 fix
+app.post('/:col/query', async (req, res) => {
+  try {
+    const col = req.params.col;
+    const Model = models[col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const { filter, projection, sort, skip, limit } = req.query;
-  const docs = await Model.find(
-    safeParse(filter, {}),
-    safeParse(projection, null)
-  )
-    .sort(safeParse(sort, {}))
-    .skip(Number(skip) || 0)
-    .limit(Number(limit) || 0);
-  res.json(docs);
+    const { filter, projection, sort } = req.body;
+    const skip = req.body.skip !== undefined ? Number(req.body.skip) : 0;
+    const limit = req.body.limit !== undefined ? Number(req.body.limit) : 0;
+    if (!Number.isInteger(skip) || skip < 0 || !Number.isInteger(limit) || limit < 0) {
+      return res.status(400).json({ error: 'Parámetros skip/limit inválidos' });
+    }
+
+    const docs = await Model.find(filter || {}, projection || null)
+      .sort(sort || {})
+      .skip(skip)
+      .limit(limit);
+
+    // No exponer contraseñas en texto plano al consultar usuarios
+    if (col === 'users') {
+      docs.forEach(doc => { doc.password = undefined; });
+    }
+
+    res.json(docs);
+  } catch (error) {
+    return sendServerError(res, error, 'POST /:col/query');
+  }
+});
+
+// Consulta simple por GET (solo skip y limit, sin filtros sensibles en URL)
+app.get('/:col', async (req, res) => {
+  try {
+    const col = req.params.col;
+    const Model = models[col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+
+    const skip = req.query.skip !== undefined ? Number(req.query.skip) : 0;
+    const limit = req.query.limit !== undefined ? Number(req.query.limit) : 0;
+    if (!Number.isInteger(skip) || skip < 0 || !Number.isInteger(limit) || limit < 0) {
+      return res.status(400).json({ error: 'Parámetros skip/limit inválidos' });
+    }
+
+    // No exponer contraseñas en texto plano al listar usuarios
+    const projection = col === 'users' ? { password: 0 } : null;
+
+    const docs = await Model.find({}, projection)
+      .skip(skip)
+      .limit(limit);
+    res.json(docs);
+  } catch (error) {
+    return sendServerError(res, error, 'GET /:col');
+  }
 });
 
 // Crear un documento
 app.post('/:col', async (req, res) => {
-  const col = req.params.col;
-  const Model = models[col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const col = req.params.col;
+    const Model = models[col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const body = structuredClone(req.body);
-  body._id = uuidv4();
+    const body = structuredClone(req.body);
+    body._id = uuidv4();
 
-  // Solo si la colección es "restaurant"
-  if (col === 'restaurants' && Array.isArray(body.menu)) {
-    body.menu = body.menu.map(item => ({ _id: uuidv4(), ...item }));
+    // Solo si la colección es "restaurant"
+    if (col === 'restaurants' && Array.isArray(body.menu)) {
+      body.menu = body.menu.map(item => ({ _id: uuidv4(), ...item }));
+    }
+
+    const doc = new Model(body);
+    await doc.save();
+    res.json(doc);
+  } catch (error) {
+    return sendServerError(res, error, 'POST /:col');
   }
-
-  const doc = new Model(body);
-  await doc.save();
-  res.json(doc);
 });
 
 // Crear varios documentos (bulk)
 app.post('/:col/bulk', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const Model = models[req.params.col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const docs = await Model.insertMany(req.body);
-  res.json(docs);
+    const docs = await Model.insertMany(req.body);
+    res.json(docs);
+  } catch (error) {
+    return sendServerError(res, error, 'POST /:col/bulk');
+  }
 });
 
 // Actualizar un documento por ID
 app.patch('/:col/:id', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const Model = models[req.params.col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const doc = await Model.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(doc);
+    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(doc);
+  } catch (error) {
+    return sendServerError(res, error, 'PATCH /:col/:id');
+  }
 });
 
 // Actualizar varios documentos
 app.patch('/:col', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const Model = models[req.params.col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const { filter, patch } = req.body;
-  const result = await Model.updateMany(filter, patch);
-  res.json(result);
+    const { filter, patch } = req.body;
+    const result = await Model.updateMany(filter, patch);
+    res.json(result);
+  } catch (error) {
+    return sendServerError(res, error, 'PATCH /:col');
+  }
 });
 
 // Eliminar un documento por ID
 app.delete('/:col/:id', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const Model = models[req.params.col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const doc = await Model.findByIdAndDelete(req.params.id);
-  res.json(doc);
+    const doc = await Model.findByIdAndDelete(req.params.id);
+    res.json(doc);
+  } catch (error) {
+    return sendServerError(res, error, 'DELETE /:col/:id');
+  }
 });
 
 // Eliminar varios documentos
 app.delete('/:col', async (req, res) => {
-  const Model = models[req.params.col];
-  if (!Model) return res.status(404).json({ error: 'Colección no existe' });
+  try {
+    const Model = models[req.params.col];
+    if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-  const { filter } = req.body;
-  const result = await Model.deleteMany(filter);
-  res.json(result);
+    const { filter } = req.body;
+    const result = await Model.deleteMany(filter);
+    res.json(result);
+  } catch (error) {
+    return sendServerError(res, error, 'DELETE /:col');
+  }
+});
+
+// Middleware global de manejo de errores — CWE-200 fix
+// Captura cualquier excepción no controlada y devuelve un mensaje genérico
+app.use((err, req, res, _next) => {
+  console.error('Error no controlado:', err);
+  // JSON malformado en el body (express.json()) es culpa del cliente, no del servidor
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    return res.status(400).json({ error: 'JSON inválido en el cuerpo de la solicitud' });
+  }
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 
