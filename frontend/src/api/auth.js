@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:5555';
 
 export const login = async (username, password) => {
   try {
-    console.log(`Intentando login en: ${API_URL}/login`);
+
     
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
@@ -16,20 +16,12 @@ export const login = async (username, password) => {
     if (!response.ok) {
       const text = await response.text();
       
-      console.error('Respuesta no exitosa:', {
-        status: response.status,
-        statusText: response.statusText,
-        contentType: response.headers.get('content-type'),
-        textPreview: text.substring(0, 100) // Mostrar los primeros 100 caracteres
-      });
-      
-      throw new Error(`Error de servidor: ${response.status} ${response.statusText}`);
+      throw new Error('Credenciales inválidas o error del servidor');
     }
     
     // Si llegamos aquí, podemos convertir a JSON
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      console.error('Respuesta no es JSON:', contentType);
       throw new Error('La respuesta del servidor no es JSON válido');
     }
     
@@ -39,8 +31,6 @@ export const login = async (username, password) => {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('Error al parsear JSON:', e);
-      console.error('Texto recibido:', text.substring(0, 200));
       throw new Error('El servidor devolvió una respuesta JSON inválida');
     }
     
@@ -56,14 +46,14 @@ export const login = async (username, password) => {
     // Retornar los datos normalizados para su uso inmediato
     return normalizedUser;
   } catch (error) {
-    console.error('Error en login:', error);
+
     throw error;
   }
 };
 
 export const register = async (username, password, userData = {}) => {
   try {
-    console.log(`Intentando registro en: ${API_URL}/register`);
+
     
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
@@ -78,20 +68,12 @@ export const register = async (username, password, userData = {}) => {
     if (!response.ok) {
       const text = await response.text();
       
-      console.error('Respuesta no exitosa:', {
-        status: response.status,
-        statusText: response.statusText,
-        contentType: response.headers.get('content-type'),
-        textPreview: text.substring(0, 100)
-      });
-      
-      throw new Error(`Error de servidor: ${response.status} ${response.statusText}`);
+      throw new Error('Error al registrar usuario');
     }
     
     // Si llegamos aquí, podemos convertir a JSON
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      console.error('Respuesta no es JSON:', contentType);
       throw new Error('La respuesta del servidor no es JSON válido');
     }
     
@@ -101,14 +83,12 @@ export const register = async (username, password, userData = {}) => {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('Error al parsear JSON:', e);
-      console.error('Texto recibido:', text.substring(0, 200));
       throw new Error('El servidor devolvió una respuesta JSON inválida');
     }
     
     return normalizeUserData(data);
   } catch (error) {
-    console.error('Error en registro:', error);
+
     throw error;
   }
 };
