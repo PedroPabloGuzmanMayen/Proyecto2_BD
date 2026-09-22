@@ -5,6 +5,7 @@ import StatsManager from './components/StatsManager.jsx';
 import Login from './components/Login.jsx';
 import CustomerDashboard from './components/CustomerDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import RestaurantReviews from './components/RestaurantReviews.jsx';
 import './App.css';
 
 function Navigation() {
@@ -52,6 +53,13 @@ function Navigation() {
               className={`nav-link ${location.pathname === '/reviews' ? 'active' : ''}`}
             >
               Mis Reviews
+            </Link>
+
+            <Link
+              to="/restaurant-reviews"
+              className={`nav-link ${location.pathname === '/restaurant-reviews' ? 'active' : ''}`}
+            >
+              Reviews de Restaurantes
             </Link>
           </>
         )}
@@ -104,6 +112,12 @@ export default function App() {
             <Route path="/reviews" element={
               <ProtectedRoute>
                 <CustomerDashboard initialTab="reviews" />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/restaurant-reviews" element={
+              <ProtectedRoute>
+                <CustomerDashboard initialTab="restaurant-reviews" />
               </ProtectedRoute>
             } />
 
