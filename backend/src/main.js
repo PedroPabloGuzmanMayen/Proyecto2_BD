@@ -1,3 +1,4 @@
+import 'dotenv/config'; 
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -5,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GridFSBucket } from 'mongodb';
 import multer from 'multer';
 import { Readable } from 'stream';
+import helmet from 'helmet'
 
 // Modelos
 import users from './models/users.js';
@@ -13,16 +15,51 @@ import orders from './models/orders.js';
 import reviews from './models/reviews.js';
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+const URI = process.env.URI
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      fontSrc: ["'self'"],
+      connectSrc: [
+        "'self'",
+        URI
+      ],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
+    },
+  })
+);
+
+app.use(helmet.frameguard({ action: 'deny' }));
+
+
+
 
 // Variables para GridFS
 let bucket;
 
 // CORS
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',   
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:8080'
+  ],
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
@@ -32,68 +69,17 @@ app.use(express.json());
 const getUserOrders = async (userId) => {
   try {
     const orders = await mongoose.model('orders').aggregate([
-      // Filtrar por user_id específico
-      {
-        $match: {
-          user_id: userId
-        }
-      },
-      // Lookup para obtener información del restaurante
-      {
-        $lookup: {
-          from: 'restaurants',
-          localField: 'restaurant_id',
-          foreignField: '_id',
-          as: 'restaurant'
-        }
-      },
-      // Descomponer el array de detalles para procesarlos individualmente
-      {
-        $unwind: '$detail'
-      },
-      // Lookup para obtener información del producto
-      {
-        $lookup: {
-          from: 'products', // O el nombre de tu colección de productos
-          localField: 'detail.product_id',
-          foreignField: '_id',
-          as: 'product'
-        }
-      },
-      // Reformatear los resultados
-      {
-        $project: {
+      { $match: { user_id: userId } },
+      { $sort: { createdAt: -1 } },
+      { $project: {
           _id: 1,
           total: 1,
-          restaurant_name: { $arrayElemAt: ['$restaurant.name', 0] },
-          product_name: { $arrayElemAt: ['$product.name', 0] },
-          product_id: '$detail.product_id',
-          quantity: '$detail.quantity',
-          created_at: '$createdAt'
+          restaurant_id: 1,
+          detail: 1,
+          createdAt: 1
         }
-      },
-      // Reagrupar por orden para mantener los detalles juntos
-      {
-        $group: {
-          _id: '$_id',
-          total: { $first: '$total' },
-          restaurant_name: { $first: '$restaurant_name' },
-          created_at: { $first: '$created_at' },
-          details: {
-            $push: {
-              product_name: '$product_name',
-              product_id: '$product_id',
-              quantity: '$quantity'
-            }
-          }
-        }
-      },
-      // Ordenar por fecha de creación (más reciente primero)
-      {
-        $sort: { created_at: -1 }
       }
     ]);
-    
     return orders;
   } catch (error) {
     console.error('Error al obtener las órdenes del usuario:', error);
@@ -541,6 +527,9 @@ app.delete('/:col', async (req, res) => {
 });
 
 // Arranque del servidor
-const PORT = 5555;
-app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+// Reemplaza tu línea de arranque actual por esta:
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`Servidor corriendo en http://127.0.0.1:${PORT}`);
+});
+
 
