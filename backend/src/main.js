@@ -593,8 +593,21 @@ app.post('/:col', async (req, res) => {
     const Model = models[col];
     if (!Model) return res.status(404).json({ error: 'Colección no existe' });
 
-    const body = structuredClone(req.body);
-    body._id = uuidv4();
+  const body = structuredClone(req.body);
+
+  // Validar comentarios de reseñas
+  if (col === 'reviews' && typeof body.comment === 'string') {
+      const htmlPattern = /<[^>]*>/g;
+
+      if (htmlPattern.test(body.comment)) {
+          return res.status(400).json({
+              error: 'El comentario contiene contenido HTML no permitido'
+          });
+      }
+  }
+
+  body._id = uuidv4();
+
 
     // Solo si la colección es "restaurant"
     if (col === 'restaurants' && Array.isArray(body.menu)) {
