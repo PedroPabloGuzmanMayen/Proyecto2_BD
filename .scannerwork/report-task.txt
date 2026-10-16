@@ -1,0 +1,6 @@
+projectKey=grupo5-restaurante
+serverUrl=http://localhost:9000
+serverVersion=26.10.0.133078
+dashboardUrl=http://localhost:9000/dashboard?id=grupo5-restaurante
+ceTaskId=802cc55b-71f6-43e6-bf09-e3ac4fda2281
+ceTaskUrl=http://localhost:9000/api/ce/task?id=802cc55b-71f6-43e6-bf09-e3ac4fda2281
