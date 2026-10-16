@@ -3,9 +3,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
-import { GridFSBucket } from 'mongodb';
-import multer from 'multer';
-import { Readable } from 'stream';
 import helmet from 'helmet'
 
 // Modelos
@@ -15,12 +12,10 @@ import orders from './models/orders.js';
 import reviews from './models/reviews.js';
 
 const app = express();
+// No revelar el framework en el header X-Powered-By (S5689 / CWE-200)
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3000;
 const URI = process.env.URI
-
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 
 app.use(
@@ -47,9 +42,6 @@ app.use(helmet.frameguard({ action: 'deny' }));
 
 
 
-
-// Variables para GridFS
-let bucket;
 
 // CORS
 app.use(cors({
@@ -102,13 +94,6 @@ const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/proyecto2';
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Conectado a MongoDB');
-    
-    // Inicializar GridFS después de conectar a MongoDB
-    const db = mongoose.connection.db;
-    bucket = new GridFSBucket(db, {
-      bucketName: 'uploads'
-    });
-    console.log('GridFS inicializado correctamente');
   })
   .catch(err => console.error('Error al conectar a MongoDB:', err));
 // Map de colecciones
@@ -137,144 +122,6 @@ function sendServerError(res, error, context) {
   }
   return res.status(500).json({ error: 'Error interno del servidor' });
 }
-
-// *** RUTAS DE GRIDFS ***
-
-// Subir un archivo
-app.post('/upload', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No se ha proporcionado ningún archivo' });
-  }
-
-  try {
-    // Obtener detalles del archivo
-    const { originalname, mimetype, buffer } = req.file;
-    const metadata = req.body.metadata ? JSON.parse(req.body.metadata) : {};
-    
-    // Crear un stream legible desde el buffer
-    const readableStream = new Readable();
-    readableStream.push(buffer);
-    readableStream.push(null);
-    
-    // Crear un stream de escritura a GridFS
-    const uploadStream = bucket.openUploadStream(originalname, {
-      metadata: {
-        ...metadata,
-        contentType: mimetype,
-        uploadDate: new Date()
-      }
-    });
-    
-    // Obtener el ID del archivo
-    const fileId = uploadStream.id;
-    
-    // Pipe del stream de lectura al de escritura
-    readableStream.pipe(uploadStream);
-    
-    // Manejar la finalización de la carga
-    uploadStream.on('finish', () => {
-      res.status(201).json({
-        success: true,
-        fileId: fileId,
-        filename: originalname,
-        message: 'Archivo subido correctamente'
-      });
-    });
-    
-    // Manejar errores
-    uploadStream.on('error', (error) => {
-      console.error('Error al subir el archivo:', error);
-      res.status(500).json({ success: false, message: 'Error al subir el archivo' });
-    });
-  } catch (error) {
-    console.error('Error al procesar el archivo:', error);
-    res.status(500).json({ success: false, message: 'Error al procesar el archivo' });
-  }
-});
-
-// Descargar un archivo por ID
-app.get('/files/:fileId', async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) {
-      return res.status(400).json({ success: false, message: 'ID de archivo inválido' });
-    }
-    const fileId = new mongoose.Types.ObjectId(req.params.fileId);
-
-    // Verificar si el archivo existe
-    const files = await bucket.find({ _id: fileId }).toArray();
-    
-    if (!files || files.length === 0) {
-      return res.status(404).json({ success: false, message: 'Archivo no encontrado' });
-    }
-    
-    const file = files[0];
-    
-    // Configurar los headers de la respuesta
-    res.set('Content-Type', file.metadata.contentType);
-    res.set('Content-Disposition', `attachment; filename="${file.filename}"`);
-    
-    // Abrir el stream de descarga
-    const downloadStream = bucket.openDownloadStream(fileId);
-    
-    // Pipe del stream al response
-    downloadStream.pipe(res);
-    
-    // Manejar errores
-    downloadStream.on('error', (error) => {
-      console.error('Error al descargar el archivo:', error);
-      res.status(500).json({ success: false, message: 'Error al descargar el archivo' });
-    });
-  } catch (error) {
-    console.error('Error al procesar la solicitud:', error);
-    res.status(500).json({ success: false, message: 'Error al procesar la solicitud' });
-  }
-});
-
-// Obtener información de archivos (sin contenido)
-app.get('/files', async (req, res) => {
-  try {
-    const files = await bucket.find({}).toArray();
-    
-    // Transformar la respuesta para incluir solo la información relevante
-    const fileInfos = files.map(file => ({
-      id: file._id,
-      filename: file.filename,
-      size: file.length,
-      uploadDate: file.uploadDate,
-      metadata: file.metadata
-    }));
-    
-    res.json({ success: true, files: fileInfos });
-  } catch (error) {
-    console.error('Error al obtener la lista de archivos:', error);
-    res.status(500).json({ success: false, message: 'Error al obtener la lista de archivos' });
-  }
-});
-
-// Eliminar un archivo
-app.delete('/files/:fileId', async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) {
-      return res.status(400).json({ success: false, message: 'ID de archivo inválido' });
-    }
-    const fileId = new mongoose.Types.ObjectId(req.params.fileId);
-
-    // Verificar si el archivo existe
-    const files = await bucket.find({ _id: fileId }).toArray();
-    
-    if (!files || files.length === 0) {
-      return res.status(404).json({ success: false, message: 'Archivo no encontrado' });
-    }
-    
-    // Eliminar el archivo
-    await bucket.delete(fileId);
-    
-    res.json({ success: true, message: 'Archivo eliminado correctamente' });
-  } catch (error) {
-    console.error('Error al eliminar el archivo:', error);
-    res.status(500).json({ success: false, message: 'Error al eliminar el archivo' });
-  }
-});
 
 // 		*** AGREGACIONES ***
 
@@ -701,8 +548,11 @@ app.use((err, req, res, _next) => {
 });
 
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Servidor corriendo en http://127.0.0.1:${PORT}`);
-});
 
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '127.0.0.1', () => {
+    console.log(`Servidor corriendo en http://127.0.0.1:${PORT}`);
+  });
+}
 
+export default app;
